@@ -20,10 +20,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               onClick={() => onNavigate?.('home')}
               className="flex items-center gap-2 mb-8 cursor-pointer hover:opacity-95 transition-opacity inline-flex"
             >
-              <div className="bg-primary p-2 rounded-lg">
-                <Drill className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-3xl font-black italic tracking-tighter">NTC</span>
+              <img src="/nct_vertical.png" alt="NCT Logo" className="w-32 h-32 object-contain" />
             </div>
             <p className="text-slate-400 leading-relaxed mb-8">
               Precision engineering for global projects. We provide the highest quality power tool accessories
