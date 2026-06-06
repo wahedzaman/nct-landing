@@ -34,6 +34,7 @@ export default function PillarsSection() {
           {pillars.map((pillar, index) => (
             <motion.div
               key={pillar.id}
+              id={pillar.id}
               initial={{ opacity: 0, x: index === 0 ? -20 : index === 2 ? 20 : 0, y: 20 }}
               whileInView={{ opacity: 1, x: 0, y: 0 }}
               viewport={{ once: true }}

@@ -2,7 +2,12 @@ import React from 'react';
 import { Menu, X, Drill } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export default function Navbar() {
+interface NavbarProps {
+  currentPage: 'home' | 'about' | 'contact';
+  onNavigate: (page: 'home' | 'about' | 'contact', sectionId?: string) => void;
+}
+
+export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -17,11 +22,13 @@ export default function Navbar() {
   }, [isOpen]);
 
   const navLinks = [
-    { name: 'Manufacturing', href: '#manufacturing' },
-    { name: 'Dealership', href: '#dealership' },
-    { name: 'Reselling', href: '#reselling' },
-    { name: 'Products', href: '#products' },
-    { name: 'News', href: '#news' },
+    { name: 'Home', page: 'home' },
+    // { name: 'Manufacturing', sectionId: 'manufacturing' },
+    // { name: 'Dealership', sectionId: 'dealership' },
+    // { name: 'Reselling', sectionId: 'reselling' },
+    { name: 'Products', sectionId: 'products' },
+    { name: 'News', sectionId: 'news' },
+    { name: 'About Us', page: 'about' },
   ];
 
   return (
@@ -30,25 +37,35 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center relative">
             {/* Logo and Brand Title aligned left */}
-            <a href="#" className="flex items-center gap-2 z-50">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home');
+              }}
+              className="flex items-center gap-2 z-50"
+            >
               <img src="/nct_vertical.png" alt="NCT Logo" className="w-20 h-20 object-contain" />
             </a>
-            {/* <a href="#" className="flex items-center gap-2 z-50">
-              <div className="bg-primary p-2 rounded-lg">
-                <Drill className="w-6 h-6 text-white" />
-              </div>
-              <span className={`text-2xl font-black tracking-tighter italic transition-colors ${isOpen ? 'text-white' : 'text-slate-900'}`}>
-                NCT
-              </span>
-            </a> */}
 
             {/* Desktop Navigation Link Menu (Centered in the viewport) */}
             <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
-                  href={link.href}
-                  className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
+                  href={link.page ? `#${link.page}` : `#${link.sectionId}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (link.page) {
+                      onNavigate(link.page as 'home' | 'about' | 'contact');
+                    } else {
+                      onNavigate('home', link.sectionId);
+                    }
+                  }}
+                  className={`text-sm font-semibold transition-colors ${(link.page && currentPage === link.page) || (!link.page && currentPage === 'home' && window.location.hash === `#${link.sectionId}`)
+                      ? 'text-primary font-bold'
+                      : 'text-slate-600 hover:text-primary'
+                    }`}
                 >
                   {link.name}
                 </a>
@@ -59,7 +76,14 @@ export default function Navbar() {
             <div className="hidden md:block">
               <a
                 href="#contact"
-                className="inline-block bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-primary/20"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('contact');
+                }}
+                className={`inline-block px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg ${currentPage === 'contact'
+                    ? 'bg-slate-900 text-white shadow-slate-900/25'
+                    : 'bg-primary hover:bg-primary-dark text-white shadow-primary/20 hover:shadow-primary/30'
+                  }`}
               >
                 Contact Us
               </a>
@@ -106,9 +130,20 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-3.5xl font-black uppercase tracking-tight hover:text-primary-light transition-colors text-white"
+                  href={link.page ? `#${link.page}` : `#${link.sectionId}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsOpen(false);
+                    if (link.page) {
+                      onNavigate(link.page as 'home' | 'about' | 'contact');
+                    } else {
+                      onNavigate('home', link.sectionId);
+                    }
+                  }}
+                  className={`text-3.5xl font-black uppercase tracking-tight transition-colors ${(link.page && currentPage === link.page)
+                      ? 'text-primary-light font-black'
+                      : 'text-white hover:text-primary-light'
+                    }`}
                 >
                   {link.name}
                 </motion.a>
@@ -119,8 +154,15 @@ export default function Navbar() {
             <div className="relative z-10 w-full mt-auto space-y-6">
               <a
                 href="#contact"
-                onClick={() => setIsOpen(false)}
-                className="block text-center w-full bg-primary hover:bg-primary-dark text-white py-5 rounded-2xl text-lg font-black tracking-wide shadow-2xl shadow-primary/30 transition-all"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsOpen(false);
+                  onNavigate('contact');
+                }}
+                className={`block text-center w-full py-5 rounded-2xl text-lg font-black tracking-wide transition-all ${currentPage === 'contact'
+                    ? 'bg-white text-slate-950 shadow-2xl'
+                    : 'bg-primary hover:bg-primary-dark text-white shadow-2xl shadow-primary/30'
+                  }`}
               >
                 Contact Us
               </a>
