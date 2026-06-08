@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, ShieldCheck, Factory, Globe } from 'lucide-r
 
 const SLIDES = [
   {
-    image: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2070&auto=format&fit=crop', // worker using professional heavy duty tool
+    image: 'hero/hero1.png', // worker using professional heavy duty tool
     badge: 'SAFETY STARTS HERE',
     title: 'SAFETY STARTS HERE',
     description: 'NCT power tool accessories and diagnostic gear are engineered for heavy duty industrial safety and supreme reliability.',
@@ -12,7 +12,7 @@ const SLIDES = [
     ctaLink: '#contact'
   },
   {
-    image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop', // professional automated factory floor
+    image: 'hero/hero2.png', // professional automated factory floor
     badge: 'PRECISION ENGINEERING',
     title: 'ACCURATE TO THE MICRON',
     description: 'ISO 9001:2015 certified indigenous manufacturing lines optimized for custom tool accessories and high durability standards.',
@@ -20,13 +20,37 @@ const SLIDES = [
     ctaLink: '#pillars'
   },
   {
-    image: 'https://images.unsplash.com/photo-1530124566582-ab05904f7641?q=80&w=2070&auto=format&fit=crop', // high precision carbide circular blades/gear
+    image: 'hero/hero3.png', // high precision carbide circular blades/gear
     badge: 'AUTHORIZED DEALERSHIP',
     title: 'TRUSTED BY ENTERPRISES',
     description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
     ctaText: 'Shop Catalog',
     ctaLink: '#products'
   }
+  //  {
+  //   image: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2070&auto=format&fit=crop', // worker using professional heavy duty tool
+  //   badge: 'SAFETY STARTS HERE',
+  //   title: 'SAFETY STARTS HERE',
+  //   description: 'NCT power tool accessories and diagnostic gear are engineered for heavy duty industrial safety and supreme reliability.',
+  //   ctaText: 'Learn More',
+  //   ctaLink: '#contact'
+  // },
+  // {
+  //   image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop', // professional automated factory floor
+  //   badge: 'PRECISION ENGINEERING',
+  //   title: 'ACCURATE TO THE MICRON',
+  //   description: 'ISO 9001:2015 certified indigenous manufacturing lines optimized for custom tool accessories and high durability standards.',
+  //   ctaText: 'Our Facilities',
+  //   ctaLink: '#pillars'
+  // },
+  // {
+  //   image: 'https://images.unsplash.com/photo-1530124566582-ab05904f7641?q=80&w=2070&auto=format&fit=crop', // high precision carbide circular blades/gear
+  //   badge: 'AUTHORIZED DEALERSHIP',
+  //   title: 'TRUSTED BY ENTERPRISES',
+  //   description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
+  //   ctaText: 'Shop Catalog',
+  //   ctaLink: '#products'
+  // }
 ];
 
 export default function Hero() {
@@ -115,7 +139,7 @@ export default function Hero() {
       </button>
 
       {/* Hero Content Container aligned to left */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
         <div className="flex justify-start items-center min-h-[75vh]">
           <motion.div
             key={currentIndex}
