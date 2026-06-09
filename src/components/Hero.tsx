@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, ShieldCheck, Factory, Globe } from 'lucide-r
 
 const SLIDES = [
   {
-    image: 'hero/hero1.png', // worker using professional heavy duty tool
+    image: 'hero/hero1.jpeg', // worker using professional heavy duty tool
     badge: 'SAFETY STARTS HERE',
     title: 'SAFETY STARTS HERE',
     description: 'NCT power tool accessories and diagnostic gear are engineered for heavy duty industrial safety and supreme reliability.',
@@ -12,7 +12,7 @@ const SLIDES = [
     ctaLink: '#contact'
   },
   {
-    image: 'hero/hero2.png', // professional automated factory floor
+    image: 'hero/hero2.jpeg', // professional automated factory floor
     badge: 'PRECISION ENGINEERING',
     title: 'ACCURATE TO THE MICRON',
     description: 'ISO 9001:2015 certified indigenous manufacturing lines optimized for custom tool accessories and high durability standards.',
@@ -20,7 +20,7 @@ const SLIDES = [
     ctaLink: '#pillars'
   },
   {
-    image: 'hero/hero3.png', // high precision carbide circular blades/gear
+    image: 'hero/hero3.jpeg', // high precision carbide circular blades/gear
     badge: 'AUTHORIZED DEALERSHIP',
     title: 'TRUSTED BY ENTERPRISES',
     description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
