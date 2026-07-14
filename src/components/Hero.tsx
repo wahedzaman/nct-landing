@@ -1,56 +1,32 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ShieldCheck, Factory, Globe } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Factory, Globe, Lock } from 'lucide-react';
 
 const SLIDES = [
   {
-    image: 'hero/hero1.jpeg', // worker using professional heavy duty tool
-    badge: 'SAFETY STARTS HERE',
+    image: 'hero/hero1.jpg', // worker using professional heavy duty tool
     title: 'SAFETY STARTS HERE',
     description: 'NCT power tool accessories and diagnostic gear are engineered for heavy duty industrial safety and supreme reliability.',
-    ctaText: 'Learn More',
-    ctaLink: '#contact'
+    type: 'bolt-lock'
   },
   {
-    image: 'hero/hero2.jpeg', // professional automated factory floor
-    badge: 'PRECISION ENGINEERING',
+    image: 'hero/hero2.jpg', // professional automated factory floor
     title: 'ACCURATE TO THE MICRON',
     description: 'ISO 9001:2015 certified indigenous manufacturing lines optimized for custom tool accessories and high durability standards.',
-    ctaText: 'Our Facilities',
-    ctaLink: '#pillars'
+    type: 'Lock'
   },
   {
-    image: 'hero/hero3.jpeg', // high precision carbide circular blades/gear
-    badge: 'AUTHORIZED DEALERSHIP',
+    image: 'hero/hero3.jpg',
     title: 'TRUSTED BY ENTERPRISES',
     description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
-    ctaText: 'Shop Catalog',
-    ctaLink: '#products'
-  }
-  //  {
-  //   image: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2070&auto=format&fit=crop', // worker using professional heavy duty tool
-  //   badge: 'SAFETY STARTS HERE',
-  //   title: 'SAFETY STARTS HERE',
-  //   description: 'NCT power tool accessories and diagnostic gear are engineered for heavy duty industrial safety and supreme reliability.',
-  //   ctaText: 'Learn More',
-  //   ctaLink: '#contact'
-  // },
-  // {
-  //   image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop', // professional automated factory floor
-  //   badge: 'PRECISION ENGINEERING',
-  //   title: 'ACCURATE TO THE MICRON',
-  //   description: 'ISO 9001:2015 certified indigenous manufacturing lines optimized for custom tool accessories and high durability standards.',
-  //   ctaText: 'Our Facilities',
-  //   ctaLink: '#pillars'
-  // },
-  // {
-  //   image: 'https://images.unsplash.com/photo-1530124566582-ab05904f7641?q=80&w=2070&auto=format&fit=crop', // high precision carbide circular blades/gear
-  //   badge: 'AUTHORIZED DEALERSHIP',
-  //   title: 'TRUSTED BY ENTERPRISES',
-  //   description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
-  //   ctaText: 'Shop Catalog',
-  //   ctaLink: '#products'
-  // }
+    type: 'normal-lock'
+  },
+  {
+    image: 'hero/hero4.jpg', // high precision carbide circular blades/gear
+    title: 'TRUSTED BY ENTERPRISES',
+    description: 'Connecting global brand catalogs list with local dealerships and priority project procurement programs.',
+    type: 'drum-lock'
+  },
 ];
 
 export default function Hero() {
@@ -110,7 +86,7 @@ export default function Hero() {
             }}
             className="absolute inset-0 w-full h-full"
           >
-            <div className="absolute inset-0 bg-slate-950/50 z-10" />
+            <div className="absolute inset-0 bg-slate-950/20 z-10" />
             <img
               src={activeSlide.image}
               alt={activeSlide.title}
@@ -146,13 +122,8 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative p-6 md:p-10 rounded-2xl bg-slate-950/95 border border-white/10 shadow-2xl max-w-lg w-full text-left"
+            className="relative p-6 md:p-10 rounded-2xl bg-grey-950/95 border border-white/10 shadow-2xl max-w-lg w-full text-left"
           >
-            {/* Opaque Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 text-primary-light text-[10px] font-black uppercase tracking-[0.25em] rounded-full mb-6 border border-primary/20">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {activeSlide.badge}
-            </div>
 
             {/* Resized neat Title */}
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1.1] tracking-tight mb-4 uppercase">
@@ -164,35 +135,15 @@ export default function Hero() {
               {activeSlide.description}
             </p>
 
-            {/* CTA action button inside the card */}
-            <div className="mb-8">
-              <a
-                href={activeSlide.ctaLink}
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-colors shadow-lg shadow-primary/20"
-              >
-                {activeSlide.ctaText}
-                <ChevronRight className="w-4 h-4" />
-              </a>
-            </div>
-
             {/* Micro Stats inside the compact opaque box */}
             <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-primary-light border border-white/10 shrink-0">
-                  <Factory className="w-4 h-4" />
+                  <Lock className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-white tracking-tight">125k+ Sq. Ft</p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Facility</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-primary-light border border-white/10 shrink-0">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-black text-white tracking-tight">500+ Dealers</p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Network</p>
+                  <p className="text-sm font-black text-white tracking-tight"> {activeSlide.type}</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
                 </div>
               </div>
             </div>
@@ -209,11 +160,10 @@ export default function Hero() {
               setDirection(index > currentIndex ? 1 : -1);
               setCurrentIndex(index);
             }}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? 'bg-primary w-8'
-                : 'bg-white/30 hover:bg-white/50'
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
+              ? 'bg-primary w-8'
+              : 'bg-white/30 hover:bg-white/50'
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
