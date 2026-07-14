@@ -122,7 +122,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative p-6 md:p-10 rounded-2xl bg-grey-950/95 border border-white/10 shadow-2xl max-w-lg w-full text-left"
+            className="relative ml-9 p-6 md:p-10 rounded-2xl bg-grey-950/95 border border-white/10 shadow-2xl max-w-lg w-full text-left"
           >
 
             {/* Resized neat Title */}

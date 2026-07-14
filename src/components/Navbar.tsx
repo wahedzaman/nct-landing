@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, Drill } from 'lucide-react';
+import { Menu, X, Drill, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface NavbarProps {
@@ -9,6 +9,8 @@ interface NavbarProps {
 
 export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const [activeSection, setActiveSection] = React.useState<string>('home');
 
   React.useEffect(() => {
     if (isOpen) {
@@ -21,19 +23,69 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
     };
   }, [isOpen]);
 
+  React.useEffect(() => {
+    if (currentPage !== 'home') {
+      setActiveSection('');
+      return;
+    }
+
+    const sections = ['products', 'news'];
+    const observers = sections.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setActiveSection(id);
+          }
+        },
+        {
+          rootMargin: '-30% 0px -30% 0px',
+        }
+      );
+      observer.observe(el);
+      return { observer, el };
+    });
+
+    const handleScroll = () => {
+      if (window.scrollY < 150) {
+        setActiveSection('home');
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    return () => {
+      observers.forEach((obs) => {
+        if (obs) {
+          obs.observer.unobserve(obs.el);
+        }
+      });
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [currentPage]);
+
   const navLinks = [
-    { name: 'Home', page: 'home' },
-    // { name: 'Manufacturing', sectionId: 'manufacturing' },
-    // { name: 'Dealership', sectionId: 'dealership' },
-    // { name: 'Reselling', sectionId: 'reselling' },
-    { name: 'Products', sectionId: 'products' },
-    { name: 'News', sectionId: 'news' },
-    { name: 'About Us', page: 'about' },
+    { name: 'HOME', page: 'home' },
+    { name: 'PRODUCTS', sectionId: 'products' },
+    { name: 'NEWS', sectionId: 'news' },
+    { name: 'ABOUT US', page: 'about' },
   ];
+
+  const isLinkActive = (link: typeof navLinks[number]) => {
+    if (link.page) {
+      if (link.page === 'home') {
+        return currentPage === 'home' && activeSection === 'home';
+      }
+      return currentPage === link.page;
+    }
+    return currentPage === 'home' && activeSection === link.sectionId;
+  };
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-md border-b ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center relative">
             {/* Logo and Brand Title aligned left */}
@@ -45,7 +97,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               }}
               className="flex items-center gap-2 z-50"
             >
-              <img src="/nct_vertical.png" alt="NCT Logo" className="w-20 h-20 object-contain" />
+              <img src="/nct_vertical.png" alt="NCT Logo" className="w-30 h-20 object-contain" />
             </a>
 
             {/* Desktop Navigation Link Menu (Centered in the viewport) */}
@@ -62,10 +114,11 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                       onNavigate('home', link.sectionId);
                     }
                   }}
-                  className={`text-sm font-semibold transition-colors ${(link.page && currentPage === link.page) || (!link.page && currentPage === 'home' && window.location.hash === `#${link.sectionId}`)
+                  className={`text-sm font-semibold transition-colors ${
+                    isLinkActive(link)
                       ? 'text-primary font-bold'
                       : 'text-slate-600 hover:text-primary'
-                    }`}
+                  }`}
                 >
                   {link.name}
                 </a>
@@ -73,7 +126,14 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
             </div>
 
             {/* Desktop Contact Us CTA pushed to the far right */}
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-6">
+              <a
+                href="tel:+8801894540055"
+                className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
+              >
+                <Phone className="w-4 h-4" />
+                <span>+8801894540055</span>
+              </a>
               <a
                 href="#contact"
                 onClick={(e) => {
@@ -81,11 +141,11 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                   onNavigate('contact');
                 }}
                 className={`inline-block px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg ${currentPage === 'contact'
-                    ? 'bg-slate-900 text-white shadow-slate-900/25'
-                    : 'bg-primary hover:bg-primary-dark text-white shadow-primary/20 hover:shadow-primary/30'
+                  ? 'bg-slate-900 text-white shadow-slate-900/25'
+                  : 'bg-primary hover:bg-primary-dark text-white shadow-primary/20 hover:shadow-primary/30'
                   }`}
               >
-                Contact Us
+                CONTACT US
               </a>
             </div>
 
@@ -140,10 +200,11 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                       onNavigate('home', link.sectionId);
                     }
                   }}
-                  className={`text-3.5xl font-black uppercase tracking-tight transition-colors ${(link.page && currentPage === link.page)
+                  className={`text-3.5xl font-black uppercase tracking-tight transition-colors ${
+                    isLinkActive(link)
                       ? 'text-primary-light font-black'
                       : 'text-white hover:text-primary-light'
-                    }`}
+                  }`}
                 >
                   {link.name}
                 </motion.a>
@@ -160,8 +221,8 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                   onNavigate('contact');
                 }}
                 className={`block text-center w-full py-5 rounded-2xl text-lg font-black tracking-wide transition-all ${currentPage === 'contact'
-                    ? 'bg-white text-slate-950 shadow-2xl'
-                    : 'bg-primary hover:bg-primary-dark text-white shadow-2xl shadow-primary/30'
+                  ? 'bg-white text-slate-950 shadow-2xl'
+                  : 'bg-primary hover:bg-primary-dark text-white shadow-2xl shadow-primary/30'
                   }`}
               >
                 Contact Us
