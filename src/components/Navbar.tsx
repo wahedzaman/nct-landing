@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, Drill, Phone } from 'lucide-react';
+import { Menu, X, Facebook, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface NavbarProps {
@@ -132,6 +132,9 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               >
                 <Phone className="w-4 h-4" />
                 <span>+8801894540054</span>
+              </a>
+              <a href="https://www.facebook.com/newcitytradebd" className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-primary-dark bg-primary transition-colors">
+                <Facebook className="w-5 h-5" />
               </a>
               <a
                 href="#contact"

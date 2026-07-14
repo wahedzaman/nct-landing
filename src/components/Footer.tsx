@@ -1,5 +1,5 @@
 import React from 'react';
-import { Drill, Mail, Phone, MapPin, Linkedin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook } from 'lucide-react';
 
 interface FooterProps {
   onNavigate?: (page: 'home' | 'about' | 'contact', sectionId?: string) => void;
@@ -27,11 +27,9 @@ export default function Footer({ onNavigate }: FooterProps) {
               for professional workers worldwide.
             </p>
             <div className="flex gap-4">
-              {[Linkedin, Facebook, Twitter, Instagram].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              <a href="https://www.facebook.com/newcitytradebd" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
@@ -86,7 +84,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         </div>
 
         {/* Newsletter Bottom Bar */}
-        <div className="bg-white/5 rounded-3xl p-8 md:p-12 mb-24 border border-white/10">
+        {/* <div className="bg-white/5 rounded-3xl p-8 md:p-12 mb-24 border border-white/10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="text-center lg:text-left">
               <h3 className="text-2xl font-bold mb-2">Subscribe to our Catalog</h3>
@@ -105,7 +103,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               </form>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex flex-col md:flex-row items-center justify-between pt-12 border-t border-white/10 gap-6">
           <p className="text-slate-500 text-sm font-medium">

@@ -10,10 +10,10 @@ export default function NewsSection() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-2xl">
             <p className="text-primary font-mono text-xs font-bold uppercase tracking-widest mb-4">
-              Corporate Ledger
+              STAY UPDATED
             </p>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">
-              LATEST NEWS & <br />PUBLICATIONS.
+              LATEST NEWS & <br />BLOGS
             </h2>
           </div>
         </div>
