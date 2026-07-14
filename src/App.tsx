@@ -77,7 +77,7 @@ export default function App() {
             <ContactForm />
 
             {/* Call to Action Section */}
-            <section className="py-24 bg-primary relative overflow-hidden">
+            {/* <section className="py-24 bg-primary relative overflow-hidden">
               <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
                 <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 uppercase">
@@ -102,7 +102,7 @@ export default function App() {
                   </button>
                 </div>
               </div>
-            </section>
+            </section> */}
           </>
         );
     }

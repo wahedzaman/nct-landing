@@ -1,43 +1,43 @@
-import { Drill, Scissors, Construction, Settings, Hammer, ShieldCheck } from 'lucide-react';
+import { Drill, Scissors, Settings, Hammer, ShieldCheck, Lock } from 'lucide-react';
 import React from 'react';
 import { Category, NewsItem, Product, Stat } from './types';
 
 export const CATEGORIES: Category[] = [
+  { id: 'lock', name: 'Premium Pad Locks', icon: <Lock className="w-6 h-6" /> },
   { id: 'drilling', name: 'Drilling Solutions', icon: <Drill className="w-6 h-6" /> },
   { id: 'cutting', name: 'Cutting Technology', icon: <Scissors className="w-6 h-6" /> },
-  { id: 'fastening', name: 'Fastening Tools', icon: <Construction className="w-6 h-6" /> },
   { id: 'grinding', name: 'Grinding & Finishing', icon: <Settings className="w-6 h-6" /> },
   { id: 'impact', name: 'Impact Accessories', icon: <Hammer className="w-6 h-6" /> },
   { id: 'safety', name: 'Safety Equipment', icon: <ShieldCheck className="w-6 h-6" /> },
 ];
 
 export const STATS: Stat[] = [
-  { label: 'Years in Business', value: '25', suffix: '+' },
-  { label: 'Registered Dealers', value: '500', suffix: '+' },
-  { label: 'Units Shipped', value: '10', suffix: 'M+' },
-  { label: 'Countries Reached', value: '45', suffix: '+' },
+  { label: 'Years in Business', value: '15', suffix: '+' },
+  { label: 'Total Products', value: '500', suffix: '+' },
+  { label: 'Operating In', value: '10', suffix: 'Districts' },
+  { label: 'Total Employees', value: '51', suffix: '+' },
 ];
 
 export const FEATURED_PRODUCTS: Product[] = [
-  { 
-    id: '1', 
-    name: 'Precision Cobalt Drill Set', 
-    category: 'Drilling', 
+  {
+    id: '1',
+    name: 'Precision Cobalt Drill Set',
+    category: 'Drilling',
     image: 'ntc_drill_bits_macro',
-    isNew: true 
+    isNew: true
   },
-  { 
-    id: '2', 
-    name: 'Diamond Tipped Circular Blade', 
-    category: 'Cutting', 
-    image: 'ntc_saw_blades_macro' 
+  {
+    id: '2',
+    name: 'Diamond Tipped Circular Blade',
+    category: 'Cutting',
+    image: 'ntc_saw_blades_macro'
   },
-  { 
-    id: '3', 
-    name: 'Impact-Ready Hex Set', 
-    category: 'Impact', 
+  {
+    id: '3',
+    name: 'Impact-Ready Hex Set',
+    category: 'Impact',
     image: 'ntc_impact_bits_macro',
-    isNew: true 
+    isNew: true
   },
 ];
 

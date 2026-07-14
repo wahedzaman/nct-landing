@@ -114,11 +114,10 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                       onNavigate('home', link.sectionId);
                     }
                   }}
-                  className={`text-sm font-semibold transition-colors ${
-                    isLinkActive(link)
-                      ? 'text-primary font-bold'
-                      : 'text-slate-600 hover:text-primary'
-                  }`}
+                  className={`text-sm font-semibold transition-colors ${isLinkActive(link)
+                    ? 'text-primary font-bold'
+                    : 'text-slate-600 hover:text-primary'
+                    }`}
                 >
                   {link.name}
                 </a>
@@ -128,11 +127,11 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
             {/* Desktop Contact Us CTA pushed to the far right */}
             <div className="hidden md:flex items-center gap-6">
               <a
-                href="tel:+8801894540055"
+                href="tel:+8801894540054"
                 className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                <span>+8801894540055</span>
+                <span>+8801894540054</span>
               </a>
               <a
                 href="#contact"
@@ -200,11 +199,10 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                       onNavigate('home', link.sectionId);
                     }
                   }}
-                  className={`text-3.5xl font-black uppercase tracking-tight transition-colors ${
-                    isLinkActive(link)
-                      ? 'text-primary-light font-black'
-                      : 'text-white hover:text-primary-light'
-                  }`}
+                  className={`text-3.5xl font-black uppercase tracking-tight transition-colors ${isLinkActive(link)
+                    ? 'text-primary-light font-black'
+                    : 'text-white hover:text-primary-light'
+                    }`}
                 >
                   {link.name}
                 </motion.a>

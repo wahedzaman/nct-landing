@@ -9,10 +9,10 @@ export default function CategoriesSection() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-2xl">
             <p className="text-primary font-mono text-xs font-bold uppercase tracking-widest mb-4">
-              Comprehensive Range
+              Comprehensive Product Range
             </p>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">
-              TAILORED FOR <br />EVERY INDUSTRY.
+              WE HAVE PRODUCTS <br /> FOR EVERY INDUSTRY.
             </h2>
           </div>
           <div className="text-slate-500 max-w-sm">
