@@ -17,12 +17,35 @@ import Footer from './components/Footer';
 
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
+import News from './pages/News';
+import NewsDetails from './pages/NewsDetails';
+import CmsPanel from './pages/CmsPanel';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = React.useState<'home' | 'about' | 'contact'>('home');
+  const [currentPage, setCurrentPage] = React.useState<'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel'>('home');
+  const [selectedNewsId, setSelectedNewsId] = React.useState<string | null>(null);
 
-  const handleNavigate = (page: 'home' | 'about' | 'contact', sectionId?: string) => {
+  React.useEffect(() => {
+    const path = window.location.pathname;
+    if (path.endsWith('/cms-panel')) {
+      setCurrentPage('cms-panel');
+    }
+  }, []);
+
+  const handleNavigate = (
+    page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel',
+    sectionId?: string,
+    newsId?: string
+  ) => {
     setCurrentPage(page);
+    if (newsId) {
+      setSelectedNewsId(newsId);
+    }
+    if (page === 'cms-panel') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState(null, '', '/cms-panel');
+      return;
+    }
     if (sectionId) {
       setTimeout(() => {
         const element = document.getElementById(sectionId);
@@ -33,7 +56,7 @@ export default function App() {
       }, 100);
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      window.history.pushState(null, '', ' ');
+      window.history.pushState(null, '', '/');
     }
   };
 
@@ -43,6 +66,12 @@ export default function App() {
         return <AboutUs />;
       case 'contact':
         return <ContactUs />;
+      case 'news':
+        return <News onNavigate={handleNavigate} />;
+      case 'news-details':
+        return <NewsDetails newsId={selectedNewsId} onNavigate={handleNavigate} />;
+      case 'cms-panel':
+        return <CmsPanel onNavigate={handleNavigate} />;
       case 'home':
       default:
         return (
@@ -72,7 +101,7 @@ export default function App() {
               </div>
             </section> */}
 
-            <NewsSection />
+            <NewsSection onNavigate={handleNavigate} />
 
             <ContactForm />
 

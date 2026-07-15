@@ -2,7 +2,7 @@ import React from 'react';
 import { Mail, Phone, MapPin, Facebook } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate?: (page: 'home' | 'about' | 'contact', sectionId?: string) => void;
+  onNavigate?: (page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel', sectionId?: string, newsId?: string) => void;
 }
 
 export default function Footer({ onNavigate }: FooterProps) {
@@ -48,7 +48,18 @@ export default function Footer({ onNavigate }: FooterProps) {
                   About Us
                 </a>
               </li>
-              <li><a href="#" className="hover:text-primary transition-colors">Safety Standards</a></li>
+              <li>
+                <a
+                  href="#news"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate?.('news');
+                  }}
+                  className="hover:text-primary transition-colors"
+                >
+                  Newsroom
+                </a>
+              </li>
               <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Sustainability</a></li>
             </ul>
@@ -109,10 +120,20 @@ export default function Footer({ onNavigate }: FooterProps) {
           <p className="text-slate-500 text-sm font-medium">
             © 2026 NCT (New Trade Center). All Rights Reserved.
           </p>
-          <div className="flex gap-8 text-slate-500 text-xs font-bold uppercase tracking-widest">
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
             <a href="#" className="hover:text-primary transition-colors">Accessibility</a>
+            <a
+              href="/cms-panel"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate?.('cms-panel');
+              }}
+              className="hover:text-primary transition-colors text-slate-400 font-extrabold"
+            >
+              CMS Panel
+            </a>
           </div>
         </div>
       </div>

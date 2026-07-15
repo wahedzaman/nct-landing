@@ -3,8 +3,8 @@ import { Menu, X, Facebook, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface NavbarProps {
-  currentPage: 'home' | 'about' | 'contact';
-  onNavigate: (page: 'home' | 'about' | 'contact', sectionId?: string) => void;
+  currentPage: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel';
+  onNavigate: (page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel', sectionId?: string, newsId?: string) => void;
 }
 
 export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
@@ -67,13 +67,16 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
   }, [currentPage]);
 
   const navLinks = [
-    { name: 'HOME', page: 'home' },
+    { name: 'HOME', page: 'home' as const },
     { name: 'PRODUCTS', sectionId: 'products' },
-    { name: 'NEWS', sectionId: 'news' },
-    { name: 'ABOUT US', page: 'about' },
+    { name: 'NEWS', sectionId: 'news', page: 'news' as const },
+    { name: 'ABOUT US', page: 'about' as const },
   ];
 
   const isLinkActive = (link: typeof navLinks[number]) => {
+    if (link.name === 'NEWS') {
+      return (currentPage === 'home' && activeSection === 'news') || currentPage === 'news' || currentPage === 'news-details';
+    }
     if (link.page) {
       if (link.page === 'home') {
         return currentPage === 'home' && activeSection === 'home';
@@ -108,8 +111,14 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                   href={link.page ? `#${link.page}` : `#${link.sectionId}`}
                   onClick={(e) => {
                     e.preventDefault();
-                    if (link.page) {
-                      onNavigate(link.page as 'home' | 'about' | 'contact');
+                    if (link.name === 'NEWS') {
+                      if (currentPage === 'home') {
+                        onNavigate('home', 'news');
+                      } else {
+                        onNavigate('news');
+                      }
+                    } else if (link.page) {
+                      onNavigate(link.page);
                     } else {
                       onNavigate('home', link.sectionId);
                     }
@@ -196,8 +205,14 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     setIsOpen(false);
-                    if (link.page) {
-                      onNavigate(link.page as 'home' | 'about' | 'contact');
+                    if (link.name === 'NEWS') {
+                      if (currentPage === 'home') {
+                        onNavigate('home', 'news');
+                      } else {
+                        onNavigate('news');
+                      }
+                    } else if (link.page) {
+                      onNavigate(link.page);
                     } else {
                       onNavigate('home', link.sectionId);
                     }

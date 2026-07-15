@@ -26,4 +26,13 @@ export interface NewsItem {
   title: string;
   excerpt: string;
   category: string;
+  image: string;
+  readTime: string;
+  author: {
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  content: string[];
+  tags?: string[];
 }
