@@ -1,7 +1,7 @@
 import React from 'react';
 import { NEWS_ITEMS } from '../constants';
 import { motion } from 'motion/react';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, FileText } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { NewsItem } from '../types';
 
@@ -10,8 +10,8 @@ interface NewsSectionProps {
 }
 
 export default function NewsSection({ onNavigate }: NewsSectionProps) {
-  const [items, setItems] = React.useState<NewsItem[]>(NEWS_ITEMS.slice(0, 3));
-  const [loading, setLoading] = React.useState(false);
+  const [items, setItems] = React.useState<NewsItem[]>(isSupabaseConfigured ? [] : NEWS_ITEMS.slice(0, 3));
+  const [loading, setLoading] = React.useState(isSupabaseConfigured);
 
   React.useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -55,12 +55,13 @@ export default function NewsSection({ onNavigate }: NewsSectionProps) {
               tags: item.tags
             }));
 
-          if (activeArticles.length > 0) {
-            setItems(activeArticles);
-          }
+          setItems(activeArticles);
+        } else {
+          setItems([]);
         }
       } catch (err) {
         console.error('Error fetching news from Supabase, using mock fallback:', err);
+        setItems(NEWS_ITEMS.slice(0, 3));
       } finally {
         setLoading(false);
       }
@@ -93,6 +94,14 @@ export default function NewsSection({ onNavigate }: NewsSectionProps) {
           <div className="py-12 text-center">
             <div className="w-8 h-8 border-3 border-slate-250 border-t-primary rounded-full animate-spin mx-auto mb-4" />
             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Loading latest posts...</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-[32px] p-12 text-center shadow-sm max-w-xl mx-auto">
+            <FileText className="w-12 h-12 text-slate-350 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-900 mb-1">No news available</h3>
+            <p className="text-slate-500 text-sm font-semibold leading-relaxed">
+              Stay tuned! We'll be posting news, updates, and technical breakthroughs soon.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -4,9 +4,97 @@ import { motion } from 'motion/react';
 import {
   Lock, Mail, Key, LogOut, ArrowLeft, Plus, Edit2, Trash2, Calendar,
   Clock, Eye, FileText, Check, AlertCircle, Bold, Italic, Heading2,
-  Heading3, Quote, List, Link2, LayoutGrid, Image, Sparkles
+  Heading3, Quote, List, Link2, LayoutGrid, Image, Sparkles, UploadCloud, Camera
 } from 'lucide-react';
 import { NewsItem } from '../types';
+
+const compressImage = (file: File, maxWidth = 1200, maxHeight = 900, maxSizeBytes = 1048576): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Uploaded file is not an image.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width / height > maxWidth / maxHeight) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(event.target?.result as string);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let quality = 0.8;
+        let base64 = canvas.toDataURL('image/jpeg', quality);
+
+        // Compress until under size limit or quality drops too low
+        while (base64.length > 1.33 * maxSizeBytes && quality > 0.1) {
+          quality -= 0.1;
+          base64 = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        resolve(base64);
+      };
+      img.onerror = (err) => reject(err);
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+};
+
+const compressAvatar = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Uploaded file is not an image.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const SIZE = 200;
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(event.target?.result as string);
+          return;
+        }
+        
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, SIZE, SIZE);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = (err) => reject(err);
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+};
 
 interface CmsPanelProps {
   onNavigate: (page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel', sectionId?: string, newsId?: string) => void;
@@ -36,15 +124,20 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   const [title, setTitle] = React.useState('');
   const [excerpt, setExcerpt] = React.useState('');
   const [category, setCategory] = React.useState('INNOVATION');
-  const [image, setImage] = React.useState('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop');
+  const [image, setImage] = React.useState('');
   const [readTime, setReadTime] = React.useState('5 min read');
-  const [authorName, setAuthorName] = React.useState('Dr. Elena Rostova');
-  const [authorRole, setAuthorRole] = React.useState('Chief Technology Officer');
-  const [authorAvatar, setAuthorAvatar] = React.useState('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop');
+  const [authorName, setAuthorName] = React.useState('');
+  const [authorRole, setAuthorRole] = React.useState('');
+  const [authorAvatar, setAuthorAvatar] = React.useState('');
   const [contentText, setContentText] = React.useState('');
-  const [tagsInput, setTagsInput] = React.useState('Innovation, R&D, Tech');
+  const [tagsInput, setTagsInput] = React.useState('');
   const [status, setStatus] = React.useState<'draft' | 'published' | 'scheduled'>('published');
   const [publishedAt, setPublishedAt] = React.useState('');
+
+  // Drag and Drop Cover and Avatar States
+  const [coverDragOver, setCoverDragOver] = React.useState(false);
+  const [avatarDragOver, setAvatarDragOver] = React.useState(false);
+  const [imageError, setImageError] = React.useState('');
 
   // Handle Session checking
   React.useEffect(() => {
@@ -131,11 +224,11 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     setTitle('');
     setExcerpt('');
     setCategory('INNOVATION');
-    setImage('https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop');
+    setImage('');
     setReadTime('5 min read');
-    setAuthorName('Dr. Elena Rostova');
-    setAuthorRole('Chief Technology Officer');
-    setAuthorAvatar('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop');
+    setAuthorName('');
+    setAuthorRole('');
+    setAuthorAvatar('');
     setContentText('');
     setTagsInput('');
     setStatus('published');
@@ -174,11 +267,98 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     setActiveTab('edit');
   };
 
+  const handleCoverDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setCoverDragOver(false);
+    setImageError('');
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        setImageError('Only image files are allowed.');
+        return;
+      }
+      try {
+        const compressed = await compressImage(file);
+        setImage(compressed);
+      } catch (err: any) {
+        setImageError(err.message || 'Error compressing image.');
+      }
+    }
+  };
+
+  const handleCoverSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError('');
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        setImageError('Only image files are allowed.');
+        return;
+      }
+      try {
+        const compressed = await compressImage(file);
+        setImage(compressed);
+      } catch (err: any) {
+        setImageError(err.message || 'Error compressing image.');
+      }
+    }
+  };
+
+  const handleAvatarDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setAvatarDragOver(false);
+    setImageError('');
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        setImageError('Only image files are allowed.');
+        return;
+      }
+      try {
+        const compressed = await compressAvatar(file);
+        setAuthorAvatar(compressed);
+      } catch (err: any) {
+        setImageError(err.message || 'Error compressing avatar.');
+      }
+    }
+  };
+
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError('');
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        setImageError('Only image files are allowed.');
+        return;
+      }
+      try {
+        const compressed = await compressAvatar(file);
+        setAuthorAvatar(compressed);
+      } catch (err: any) {
+        setImageError(err.message || 'Error compressing avatar.');
+      }
+    }
+  };
+
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupabaseConfigured || !session) return;
     setSavingArticle(true);
     setDbError('');
+
+    if (!image) {
+      setDbError('Please upload a cover image.');
+      setSavingArticle(false);
+      return;
+    }
+    if (!authorAvatar) {
+      setDbError('Please upload an author avatar.');
+      setSavingArticle(false);
+      return;
+    }
 
     // Pre-process list inputs
     const contentParagraphs = contentText
@@ -277,6 +457,8 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
       replacement = `\n- ${selectedText || 'list item'}\n`;
     } else if (syntax === 'link') {
       replacement = `[${selectedText || 'link text'}](https://example.com)`;
+    } else if (syntax === 'image') {
+      replacement = `![${selectedText || 'image caption'}](https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=800&auto=format&fit=crop)`;
     }
 
     const newValue = text.substring(0, start) + replacement + text.substring(end);
@@ -289,7 +471,26 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   };
 
   // Render a paragraph preview based on simple markdown patterns
-  const renderParagraphPreview = (paragraph: string, index: number) => {
+  const renderParagraphPreview = (paragraph: string, index: number, paragraphsList: string[]) => {
+    // 1. Check if matches image: ![alt](url)
+    const imgRegex = /^!\[(.*?)\]\((.*?)\)$/;
+    const match = paragraph.match(imgRegex);
+    if (match) {
+      const alt = match[1];
+      const url = match[2];
+      return (
+        <div key={index} className="my-6 rounded-2xl overflow-hidden border border-slate-200 shadow-md max-w-full">
+          <img src={url} alt={alt} className="w-full h-auto object-cover max-h-[350px]" />
+          {alt && (
+            <div className="bg-slate-50 border-t border-slate-100 px-4 py-2 text-center text-xs font-semibold text-slate-500">
+              {alt}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 2. Check if heading 2
     if (paragraph.startsWith('## ')) {
       return (
         <h2 key={index} className="text-2xl font-bold text-slate-900 mt-6 mb-3">
@@ -297,6 +498,8 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
         </h2>
       );
     }
+
+    // 3. Check if heading 3
     if (paragraph.startsWith('### ')) {
       return (
         <h3 key={index} className="text-xl font-bold text-slate-900 mt-4 mb-2">
@@ -304,6 +507,8 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
         </h3>
       );
     }
+
+    // 4. Check if quote
     if (paragraph.startsWith('> ') || paragraph.startsWith('"') || paragraph.startsWith('“')) {
       const cleanText = paragraph.replace(/^>\s*/, '');
       return (
@@ -315,19 +520,23 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
         </blockquote>
       );
     }
+
+    // 5. Check if list
     if (paragraph.startsWith('- ')) {
       const items = paragraph.split('\n').map((item) => item.replace(/^- /, ''));
       return (
-        <ul key={index} className="list-disc pl-6 space-y-1.5 my-4 text-slate-650 text-base">
+        <ul key={index} className="list-disc pl-6 space-y-1.5 my-4 text-slate-655 text-base">
           {items.map((it, i) => <li key={i}>{it}</li>)}
         </ul>
       );
     }
 
-    // Apply drop cap styles to the first paragraph
-    if (index === 0) {
-      const firstChar = paragraph.charAt(0);
-      const restOfParagraph = paragraph.slice(1);
+    // 6. Check if it's the first text paragraph
+    const firstTextIdx = paragraphsList.findIndex(
+      (p) => !p.startsWith('##') && !p.startsWith('###') && !p.startsWith('![')
+    );
+
+    if (index === firstTextIdx) {
       return (
         <p key={index} className="first-letter:float-left first-letter:text-5xl first-letter:font-black first-letter:text-primary first-letter:mr-2.5 first-letter:leading-none text-slate-750 text-base leading-relaxed mb-4">
           {paragraph}
@@ -754,22 +963,57 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                   />
                 </div>
 
-                {/* Cover Image URL */}
+                {/* Cover Image Upload (Drag & Drop) */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-450 flex items-center gap-1">
-                    <Image className="w-3.5 h-3.5" /> Cover Image URL
+                    <Image className="w-3.5 h-3.5" /> Cover Image (Drag & Drop)
                   </label>
-                  <input
-                    type="url"
-                    required
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-semibold text-sm text-slate-700"
-                  />
-                  {image && (
-                    <div className="mt-2 h-24 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 relative">
-                      <img src={image} alt="Cover preview" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                  
+                  {image ? (
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-55 group h-40">
+                      <img src={image} alt="Cover preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <label className="bg-white hover:bg-slate-100 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs cursor-pointer flex items-center gap-1.5 shadow-md">
+                          <Camera className="w-3.5 h-3.5" /> Change
+                          <input type="file" accept="image/*" className="hidden" onChange={handleCoverSelect} />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setImage('')}
+                          className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer flex items-center gap-1.5 shadow-md"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Remove
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setCoverDragOver(true); }}
+                      onDragLeave={() => setCoverDragOver(false)}
+                      onDrop={handleCoverDrop}
+                      className={`border-dashed border-2 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[160px] ${
+                        coverDragOver
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-slate-200 bg-slate-50 hover:bg-slate-100/50 hover:border-slate-350 text-slate-500'
+                      }`}
+                      onClick={() => document.getElementById('cover-file-input')?.click()}
+                    >
+                      <UploadCloud className="w-8 h-8 mb-2 text-slate-400" />
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Drag & drop your cover image</p>
+                      <p className="text-[10px] text-slate-450 mt-1 font-semibold">Or click to browse files (JPEG/PNG)</p>
+                      <input
+                        id="cover-file-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleCoverSelect}
+                      />
+                    </div>
+                  )}
+                  {imageError && (
+                    <p className="text-[10px] font-bold text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {imageError}
+                    </p>
                   )}
                 </div>
 
@@ -799,15 +1043,45 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                     />
                   </div>
 
+                  {/* Avatar Upload (Drag & Drop) */}
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-450">Avatar URL</label>
-                    <input
-                      type="url"
-                      required
-                      value={authorAvatar}
-                      onChange={(e) => setAuthorAvatar(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-semibold text-sm text-slate-700"
-                    />
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-450">Author Avatar</label>
+                    <div className="flex items-center gap-4">
+                      {authorAvatar ? (
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 bg-slate-55 group shrink-0">
+                          <img src={authorAvatar} alt="Avatar preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                               onClick={() => document.getElementById('avatar-file-input')?.click()}>
+                            <Camera className="w-4 h-4 text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) => { e.preventDefault(); setAvatarDragOver(true); }}
+                          onDragLeave={() => setAvatarDragOver(false)}
+                          onDrop={handleAvatarDrop}
+                          className={`w-16 h-16 rounded-full border-dashed border-2 flex flex-col items-center justify-center cursor-pointer transition-all shrink-0 ${
+                            avatarDragOver
+                              ? 'border-primary bg-primary/5 text-primary'
+                              : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-350 text-slate-400'
+                          }`}
+                          onClick={() => document.getElementById('avatar-file-input')?.click()}
+                        >
+                          <UploadCloud className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-1">
+                        <p className="text-xs font-bold text-slate-700">Drag & drop profile picture</p>
+                        <p className="text-[10px] text-slate-450 font-semibold">Or click avatar to upload photo</p>
+                        <input
+                          id="avatar-file-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarSelect}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -931,9 +1205,17 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                           type="button"
                           onClick={() => insertMarkdown('link')}
                           title="Add Link"
-                          className="p-2 hover:bg-slate-200 text-slate-650 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                          className="p-2 hover:bg-slate-200 text-slate-655 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
                         >
                           <Link2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertMarkdown('image')}
+                          title="Insert Image"
+                          className="p-2 hover:bg-slate-200 text-slate-655 hover:text-slate-900 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Image className="w-4 h-4" />
                         </button>
                         <span className="ml-auto text-[10px] font-mono text-slate-400 pr-1.5">
                           Press Enter twice for paragraph breaks
@@ -965,7 +1247,10 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                             </p>
                           </div>
 
-                          {contentText.split(/\n\s*\n/).map((p, i) => renderParagraphPreview(p.trim(), i))}
+                          {(() => {
+                            const pList = contentText.split(/\n\s*\n/).map((p) => p.trim()).filter((p) => p !== '');
+                            return pList.map((p, i) => renderParagraphPreview(p, i, pList));
+                          })()}
                         </div>
                       ) : (
                         <div className="text-center py-20 text-slate-400 space-y-2">

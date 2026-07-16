@@ -64,19 +64,19 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 * **[CmsPanel.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/pages/CmsPanel.tsx) (New Page):**
   * **Auth Login Screen:** Sleek dark-mode form requiring email/password to initialize Supabase user sessions.
   * **Dashboard List:** Lists all articles (drafts, scheduled, and published) with search, category filtering, status badges, view buttons, edits, and deletions.
-  * **Add/Edit Article Form:** Standard settings inputs (Category, Read Time, Image URLs, Author Name/Role/Avatar, comma-separated Tags) and publication status selector (draft, published, or scheduled).
+  * **Add/Edit Article Form:** Standard settings inputs (Category, Read Time, Author Name/Role, comma-separated Tags) and publication status selector (draft, published, or scheduled). Replaced raw Cover URL and Avatar URL inputs with **drag-and-drop file upload zones** that read images, validate file types, dynamically resize/crop them on canvas contexts, compress them below 1 MB, and store them as Base64 strings.
   * **Scheduled Date Selector:** Active when "scheduled" is selected, taking local datetime inputs that are parsed to UTC ISO strings.
-  * **Custom Rich Text Editor:** A custom Markdown editor utilizing a toolbar interface (Bold, Italic, Headers, Quote Blocks, Lists, Links) for rapid text entry and paragraph splitting. Includes a "Live Preview" tab mirroring the dynamic layout styles of detail pages.
+  * **Custom Rich Text Editor:** A custom Markdown editor utilizing a toolbar interface (Bold, Italic, Headers, Quote Blocks, Lists, Links, and Inline Images) for rapid text entry and paragraph splitting. Includes a "Live Preview" tab mirroring the dynamic layout styles of detail pages and parsing image nodes.
 
 ### Navigation & Routing Integration
 * **[App.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/App.tsx):** Added `'cms-panel'` route state. Integrated a `useEffect` pathname listener so typing `website/cms-panel` directly in the browser loads the CMS page, and updated `handleNavigate` to update history paths correctly.
 * **[Navbar.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/components/Navbar.tsx):** Standardized prop types to align with `'cms-panel'` routing.
 * **[Footer.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/components/Footer.tsx):** Aligned navigation types and added a public "CMS Panel" link to the footer's bottom row.
 
-### Front-end Dynamic Data Binding
-* **[NewsSection.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/components/NewsSection.tsx):** Fetches the latest 3 active articles from Supabase (or falls back to mock constants). Filter engine screens out draft and future-scheduled articles in real-time.
-* **[News.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/pages/News.tsx):** Refactored to bind grid list items, search, and category pills directly to Supabase query datasets (or fallback items).
-* **[NewsDetails.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/pages/NewsDetails.tsx):** Dynamically fetches details for a given `newsId` from the database. Added dynamic query recommendations that pull up to 2 related articles of different IDs.
+### Front-end Dynamic Data Binding & Empty Placeholders
+* **[NewsSection.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/components/NewsSection.tsx):** Fetches active articles from Supabase. Added a custom placeholder banner (`No news available`) that renders if there are zero articles returned from the database.
+* **[News.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/pages/News.tsx):** Refactored to bind search/categories directly to Supabase data. If no matching database articles are available, a styled placeholder card is displayed.
+* **[NewsDetails.tsx](file:///Volumes/HomeX/wahed/Documents/Workspace/Web/nct/src/pages/NewsDetails.tsx):** Fetches the active article and matches details. Shows a beautiful `Article Not Found` card if the ID doesn't exist or is archived.
 
 ---
 

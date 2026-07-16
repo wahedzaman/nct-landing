@@ -11,9 +11,6 @@ interface NewsDetailsProps {
 }
 
 export default function NewsDetails({ newsId, onNavigate }: NewsDetailsProps) {
-  const [copied, setCopied] = React.useState(false);
-  const [emailSubscribed, setEmailSubscribed] = React.useState(false);
-  const [emailInput, setEmailInput] = React.useState('');
   const [article, setArticle] = React.useState<NewsItem | null>(null);
   const [relatedArticles, setRelatedArticles] = React.useState<NewsItem[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -127,21 +124,6 @@ export default function NewsDetails({ newsId, onNavigate }: NewsDetailsProps) {
     fetchArticleDetails();
   }, [newsId]);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput) return;
-    setEmailSubscribed(true);
-    setTimeout(() => {
-      setEmailSubscribed(false);
-      setEmailInput('');
-    }, 3000);
-  };
 
   // Helper to determine if a paragraph is a blockquote (starts with a quote character)
   const isParagraphQuote = (text: string) => {
@@ -274,27 +256,7 @@ export default function NewsDetails({ newsId, onNavigate }: NewsDetailsProps) {
                   <span className="hidden sm:inline lg:inline">Share via Email</span>
                 </a>
 
-                {/* Copy Link button */}
-                <button
-                  onClick={handleCopyLink}
-                  className={`flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 border rounded-2xl text-xs font-bold transition-all flex-1 lg:flex-none cursor-pointer ${
-                    copied
-                      ? 'bg-primary/10 border-primary/25 text-primary'
-                      : 'bg-slate-50 border-slate-200/60 text-slate-700 hover:bg-primary/5 hover:text-primary hover:border-primary/20'
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-4 h-4 text-primary shrink-0" />
-                      <span>Link Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Link2 className="w-4 h-4 shrink-0" />
-                      <span className="hidden sm:inline lg:inline">Copy Article Link</span>
-                    </>
-                  )}
-                </button>
+
               </div>
             </div>
 
@@ -317,42 +279,94 @@ export default function NewsDetails({ newsId, onNavigate }: NewsDetailsProps) {
               </div>
             )}
           </div>
-
           {/* Right Column: Main body typography */}
           <div className="lg:col-span-9 order-1 lg:order-2">
             <div className="prose max-w-none text-slate-700 font-medium text-base leading-relaxed md:text-lg space-y-6">
-              {article.content.map((paragraph, index) => {
-                // If it is the first paragraph, apply Drop Cap
-                if (index === 0) {
-                  const firstChar = paragraph.charAt(0);
-                  const restOfParagraph = paragraph.slice(1);
+              {(() => {
+                // Find index of the first text paragraph (no heading, no image, no list)
+                const firstTextIdx = article.content.findIndex(
+                  (p) => !p.startsWith('##') && !p.startsWith('###') && !p.startsWith('![') && !p.startsWith('- ')
+                );
+
+                return article.content.map((paragraph, index) => {
+                  // 1. Check if matches image: ![alt](url)
+                  const imgRegex = /^!\[(.*?)\]\((.*?)\)$/;
+                  const match = paragraph.match(imgRegex);
+                  if (match) {
+                    const alt = match[1];
+                    const url = match[2];
+                    return (
+                      <div key={index} className="my-8 rounded-[24px] overflow-hidden border border-slate-200 shadow-xl max-w-4xl mx-auto">
+                        <img src={url} alt={alt} className="w-full h-auto object-cover max-h-[500px]" />
+                        {alt && (
+                          <div className="bg-slate-50 border-t border-slate-100 px-4 py-3 text-center text-xs font-semibold text-slate-500">
+                            {alt}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // 2. Check if heading 2
+                  if (paragraph.startsWith('## ')) {
+                    return (
+                      <h2 key={index} className="text-2xl md:text-3xl font-black text-slate-900 mt-10 mb-4 uppercase tracking-tight">
+                        {paragraph.replace('## ', '')}
+                      </h2>
+                    );
+                  }
+
+                  // 3. Check if heading 3
+                  if (paragraph.startsWith('### ')) {
+                    return (
+                      <h3 key={index} className="text-xl md:text-2xl font-bold text-slate-900 mt-8 mb-3 uppercase tracking-tight">
+                        {paragraph.replace('### ', '')}
+                      </h3>
+                    );
+                  }
+
+                  // 4. Check if quote
+                  if (paragraph.startsWith('> ') || paragraph.startsWith('"') || paragraph.startsWith('“')) {
+                    const cleanText = paragraph.replace(/^>\s*/, '');
+                    return (
+                      <blockquote
+                        key={index}
+                        className="border-l-4 border-primary pl-6 py-4 my-8 text-xl font-serif italic text-slate-900 leading-relaxed font-bold bg-slate-50 rounded-r-2xl pr-6 border-y border-r border-slate-200/40 shadow-sm"
+                      >
+                        {cleanText}
+                      </blockquote>
+                    );
+                  }
+
+                  // 5. Check if list
+                  if (paragraph.startsWith('- ')) {
+                    const items = paragraph.split('\n').map((item) => item.replace(/^- /, ''));
+                    return (
+                      <ul key={index} className="list-disc pl-6 space-y-2 my-6 text-slate-700 text-base leading-relaxed">
+                        {items.map((it, i) => <li key={i} className="pl-1">{it}</li>)}
+                      </ul>
+                    );
+                  }
+
+                  // 6. Regular paragraph (apply drop cap to first text paragraph)
+                  if (index === firstTextIdx) {
+                    const firstChar = paragraph.charAt(0);
+                    const restOfParagraph = paragraph.slice(1);
+                    return (
+                      <p key={index} className="first-letter:float-left first-letter:text-6xl first-letter:font-black first-letter:text-primary first-letter:mr-3 first-letter:mt-1 first-letter:leading-none text-slate-700 font-medium text-base leading-relaxed md:text-lg mb-6">
+                        {paragraph}
+                      </p>
+                    );
+                  }
+
                   return (
-                    <p key={index} className="first-letter:float-left first-letter:text-6xl first-letter:font-black first-letter:text-primary first-letter:mr-3 first-letter:mt-1 first-letter:leading-none">
+                    <p key={index} className="text-slate-700 font-medium text-base leading-relaxed md:text-lg mb-6">
                       {paragraph}
                     </p>
                   );
-                }
-
-                // If paragraph is starting with quotes, format as premium blockquote
-                if (isParagraphQuote(paragraph)) {
-                  return (
-                    <blockquote
-                      key={index}
-                      className="border-l-4 border-primary pl-6 py-4 my-8 text-xl font-serif italic text-slate-900 leading-relaxed font-bold bg-slate-50 rounded-r-2xl pr-6 border-y border-r border-slate-200/40 shadow-sm"
-                    >
-                      {paragraph}
-                    </blockquote>
-                  );
-                }
-
-                return (
-                  <p key={index} className="mb-6">
-                    {paragraph}
-                  </p>
-                );
-              })}
+                });
+              })()}
             </div>
-
             {/* Mobile-only Tags block */}
             {article.tags && article.tags.length > 0 && (
               <div className="pt-8 mt-12 border-t border-slate-100 block lg:hidden">
@@ -451,56 +465,6 @@ export default function NewsDetails({ newsId, onNavigate }: NewsDetailsProps) {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Newsletter Signup Banner CTA */}
-      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 text-primary-light text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6">
-            STAY IN THE LOOP
-          </span>
-          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4 leading-none">
-            Subscribe to our Newsroom
-          </h2>
-          <p className="text-slate-400 text-base md:text-lg font-medium max-w-xl mx-auto mb-10 leading-relaxed">
-            Get quarterly updates containing tech breakthroughs, product launches, global dealer news, and alloy research summaries.
-          </p>
-
-          {emailSubscribed ? (
-            <div className="bg-white/5 border border-primary/20 p-8 rounded-2xl max-w-md mx-auto">
-              <p className="text-primary-light text-base font-bold flex items-center justify-center gap-2">
-                <Check className="w-5 h-5 animate-bounce" /> Thank you for subscribing!
-              </p>
-              <p className="text-slate-450 text-xs mt-2 font-medium">
-                You will receive your first NCT digest next quarter.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                required
-                placeholder="name@company.com"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                className="flex-1 px-5 py-4 bg-white/10 border border-white/20 rounded-2xl outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-semibold text-sm placeholder:text-slate-450 text-white"
-              />
-              <button
-                type="submit"
-                className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-2xl transition-all text-sm tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-primary/25 cursor-pointer"
-              >
-                Subscribe <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
-          )}
         </div>
       </section>
     </div>

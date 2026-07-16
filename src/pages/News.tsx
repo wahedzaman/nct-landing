@@ -12,13 +12,16 @@ interface NewsProps {
 export default function News({ onNavigate }: NewsProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState('ALL');
-  const [dbItems, setDbItems] = React.useState<NewsItem[]>(NEWS_ITEMS);
-  const [loading, setLoading] = React.useState(false);
+  const [dbItems, setDbItems] = React.useState<NewsItem[]>(isSupabaseConfigured ? [] : NEWS_ITEMS);
+  const [loading, setLoading] = React.useState(isSupabaseConfigured);
 
   const categories = ['ALL', 'AWARD', 'EXPANSION', 'INNOVATION', 'SUSTAINABILITY', 'TECH'];
 
   React.useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
 
     const fetchNews = async () => {
       setLoading(true);
@@ -56,12 +59,13 @@ export default function News({ onNavigate }: NewsProps) {
               tags: item.tags
             }));
 
-          if (activeArticles.length > 0) {
-            setDbItems(activeArticles);
-          }
+          setDbItems(activeArticles);
+        } else {
+          setDbItems([]);
         }
       } catch (err) {
         console.error('Error fetching news from Supabase, using mock fallback:', err);
+        setDbItems(NEWS_ITEMS);
       } finally {
         setLoading(false);
       }
