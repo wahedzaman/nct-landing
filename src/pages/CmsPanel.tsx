@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import {
   Lock, Mail, Key, LogOut, ArrowLeft, AlertCircle
 } from 'lucide-react';
-import { NewsList, NewsForm, HeroList, HeroForm, BranchList, BranchForm } from '../crm';
+import { NewsList, NewsForm, HeroList, HeroForm, BranchList, BranchForm, MessageList, SettingsManager } from '../crm';
 
 interface CmsPanelProps {
   onNavigate: (page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel', sectionId?: string, newsId?: string) => void;
@@ -19,8 +19,8 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   const [loginError, setLoginError] = React.useState('');
   const [submittingLogin, setSubmittingLogin] = React.useState(false);
 
-  // Active Menu Tab (news, hero slides, branches)
-  const [activeMenu, setActiveMenu] = React.useState<'news' | 'hero' | 'branch'>('news');
+  // Active Menu Tab (news, hero slides, branches, messages, settings)
+  const [activeMenu, setActiveMenu] = React.useState<'news' | 'hero' | 'branch' | 'messages' | 'settings'>('news');
 
   // Articles & Database States
   const [articles, setArticles] = React.useState<any[]>([]);
@@ -33,6 +33,15 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   // Branches & Database States
   const [branches, setBranches] = React.useState<any[]>([]);
   const [loadingBranches, setLoadingBranches] = React.useState(false);
+
+  // Messages Inquiries States
+  const [messages, setMessages] = React.useState<any[]>([]);
+  const [loadingMessages, setLoadingMessages] = React.useState(false);
+
+  // Captcha Settings States
+  const [captchaEnabled, setCaptchaEnabled] = React.useState(false);
+  const [captchaKey, setCaptchaKey] = React.useState('NCT-SAFE');
+  const [savingSettings, setSavingSettings] = React.useState(false);
 
   // DB Error state
   const [dbError, setDbError] = React.useState('');
@@ -133,11 +142,55 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     }
   };
 
+  // Fetch messages once logged in
+  const fetchMessages = async () => {
+    if (!isSupabaseConfigured || !session) return;
+    setLoadingMessages(true);
+    setDbError('');
+
+    try {
+      const { data, error } = await supabase!
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to fetch submitted messages');
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  // Fetch captcha settings once logged in
+  const fetchSettings = async () => {
+    if (!isSupabaseConfigured || !session) return;
+    setDbError('');
+
+    try {
+      const { data, error } = await supabase!
+        .from('settings')
+        .select('*');
+
+      if (error) throw error;
+      const enabledSetting = data?.find((s) => s.key === 'captcha_enabled');
+      const keySetting = data?.find((s) => s.key === 'captcha_key');
+
+      setCaptchaEnabled(enabledSetting?.value === 'true');
+      setCaptchaKey(keySetting?.value || 'NCT-SAFE');
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to fetch settings');
+    }
+  };
+
   React.useEffect(() => {
     if (session) {
       fetchArticles();
       fetchSlides();
       fetchBranches();
+      fetchMessages();
+      fetchSettings();
     }
   }, [session]);
 
@@ -314,6 +367,52 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     }
   };
 
+  // Form Actions (Messages Inquiries)
+  const handleDeleteMessage = async (id: string) => {
+    if (!isSupabaseConfigured || !session) return;
+    if (!window.confirm('Are you sure you want to delete this message record?')) return;
+    setDbError('');
+
+    try {
+      const { error } = await supabase!
+        .from('contact_messages')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      fetchMessages();
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to delete message');
+    }
+  };
+
+  // Form Actions (Captcha settings update)
+  const handleSaveSettings = async (newSettings: { captchaEnabled: boolean; captchaKey: string }) => {
+    if (!isSupabaseConfigured || !session) return;
+    setSavingSettings(true);
+    setDbError('');
+
+    try {
+      const { error: error1 } = await supabase!
+        .from('settings')
+        .upsert({ key: 'captcha_enabled', value: newSettings.captchaEnabled ? 'true' : 'false' });
+      if (error1) throw error1;
+
+      const { error: error2 } = await supabase!
+        .from('settings')
+        .upsert({ key: 'captcha_key', value: newSettings.captchaKey });
+      if (error2) throw error2;
+
+      setCaptchaEnabled(newSettings.captchaEnabled);
+      setCaptchaKey(newSettings.captchaKey);
+      alert('Security settings updated successfully!');
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to save settings');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   // 1. Check if Supabase configuration is missing
   if (!isSupabaseConfigured) {
     return (
@@ -415,7 +514,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                     placeholder="••••••••"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-semibold text-sm placeholder:text-slate-650 text-white"
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-semibold text-sm placeholder:text-slate-655 text-white"
                   />
                 </div>
               </div>
@@ -484,7 +583,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
 
       {/* Menu Selector Bar */}
       <div className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap gap-4 md:gap-6">
           <button
             onClick={() => { setActiveMenu('news'); setFormMode('list'); }}
             className={`py-4 text-xs font-black uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
@@ -508,6 +607,22 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
             }`}
           >
             Branches
+          </button>
+          <button
+            onClick={() => { setActiveMenu('messages'); setFormMode('list'); }}
+            className={`py-4 text-xs font-black uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
+              activeMenu === 'messages' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Messages
+          </button>
+          <button
+            onClick={() => { setActiveMenu('settings'); setFormMode('list'); }}
+            className={`py-4 text-xs font-black uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
+              activeMenu === 'settings' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Security Settings
           </button>
         </div>
       </div>
@@ -580,7 +695,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
               savingSlide={savingSlide}
             />
           )
-        ) : (
+        ) : activeMenu === 'branch' ? (
           formMode === 'list' ? (
             <BranchList
               branches={branches}
@@ -608,6 +723,18 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
               savingBranch={savingBranch}
             />
           )
+        ) : activeMenu === 'messages' ? (
+          <MessageList
+            messages={messages}
+            loadingMessages={loadingMessages}
+            onDeleteMessage={handleDeleteMessage}
+          />
+        ) : (
+          <SettingsManager
+            initialSettings={{ captchaEnabled, captchaKey }}
+            onSaveSettings={handleSaveSettings}
+            savingSettings={savingSettings}
+          />
         )}
       </main>
     </div>

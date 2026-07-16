@@ -94,6 +94,60 @@ create policy "Allow authenticated users full access for branches"
   to authenticated
   using (true)
   with check (true);
+
+-- 13. Create the contact_messages table
+create table public.contact_messages (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  name text not null,
+  company text,
+  email text,
+  phone text,
+  inquiry_type text not null,
+  message text not null
+);
+
+-- 14. Enable Row Level Security (RLS) on contact_messages
+alter table public.contact_messages enable row level security;
+
+-- 15. Policy: Public can insert messages
+create policy "Allow public inserts for contact messages"
+  on public.contact_messages for insert
+  with check (true);
+
+-- 16. Policy: Authenticated editor access to messages
+create policy "Allow authenticated users full access for contact messages"
+  on public.contact_messages for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- 17. Create the settings table
+create table public.settings (
+  key text primary key,
+  value text not null
+);
+
+-- 18. Enable Row Level Security (RLS) on settings
+alter table public.settings enable row level security;
+
+-- 19. Policy: Public read access to settings
+create policy "Allow public read access for settings"
+  on public.settings for select
+  using (true);
+
+-- 20. Policy: Authenticated editor access to settings
+create policy "Allow authenticated users full access for settings"
+  on public.settings for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- 21. Seed settings
+insert into public.settings (key, value) values
+  ('captcha_enabled', 'false'),
+  ('captcha_key', 'NCT-SAFE')
+on conflict (key) do nothing;
 ```
 
 Once you have set up the database and created an editor account under the **Authentication > Users** tab in Supabase, add the credentials to your local `.env` configuration:

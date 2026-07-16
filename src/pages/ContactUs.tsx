@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Globe, Mail, Phone, Clock, ArrowRight, ShieldCheck, MapPin, Building } from 'lucide-react';
+import { Mail, Phone, Clock, ArrowRight, ShieldCheck, MapPin, Building, AlertCircle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const STATIC_BRANCHES = [
@@ -31,17 +31,32 @@ export default function ContactUs() {
   const [formSubmitted, setFormSubmitted] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
+  // Dynamic Branches State
   const [branches, setBranches] = React.useState<any[]>(isSupabaseConfigured ? [] : STATIC_BRANCHES);
   const [loadingBranches, setLoadingBranches] = React.useState(isSupabaseConfigured);
 
-  React.useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setBranches(STATIC_BRANCHES);
-      setLoadingBranches(false);
-      return;
-    }
+  // Form Fields State
+  const [name, setName] = React.useState('');
+  const [company, setCompany] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+  const [inquiryType, setInquiryType] = React.useState('Custom Accessory Manufacturing');
+  const [message, setMessage] = React.useState('');
 
+  // Captcha configuration
+  const [captchaEnabled, setCaptchaEnabled] = React.useState(false);
+  const [captchaConfigKey, setCaptchaConfigKey] = React.useState('');
+  const [captchaInput, setCaptchaInput] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  React.useEffect(() => {
+    // 1. Fetch branches
     const fetchBranches = async () => {
+      if (!isSupabaseConfigured) {
+        setBranches(STATIC_BRANCHES);
+        setLoadingBranches(false);
+        return;
+      }
       setLoadingBranches(true);
       try {
         const { data, error } = await supabase!
@@ -59,17 +74,74 @@ export default function ContactUs() {
       }
     };
 
+    // 2. Fetch captcha settings
+    const fetchCaptchaSettings = async () => {
+      if (!isSupabaseConfigured) return;
+      try {
+        const { data, error } = await supabase!
+          .from('settings')
+          .select('*');
+        if (error) throw error;
+
+        const enabledSetting = data?.find((s) => s.key === 'captcha_enabled');
+        const keySetting = data?.find((s) => s.key === 'captcha_key');
+
+        setCaptchaEnabled(enabledSetting?.value === 'true');
+        setCaptchaConfigKey(keySetting?.value || 'NCT-SAFE');
+      } catch (err) {
+        console.error('Error fetching captcha settings:', err);
+      }
+    };
+
     fetchBranches();
+    fetchCaptchaSettings();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API request
-    setTimeout(() => {
+    setError('');
+
+    // Captcha validation
+    if (captchaEnabled && captchaInput.trim() !== captchaConfigKey.trim()) {
+      setError('Incorrect security captcha verification code. Please try again.');
       setIsLoading(false);
+      return;
+    }
+
+    try {
+      if (isSupabaseConfigured) {
+        const { error: insertError } = await supabase!
+          .from('contact_messages')
+          .insert([
+            {
+              name,
+              company: company || null,
+              email: email || null,
+              phone: phone || null,
+              inquiry_type: inquiryType,
+              message
+            }
+          ]);
+        if (insertError) throw insertError;
+      } else {
+        // Fallback simulation
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
       setFormSubmitted(true);
-    }, 1200);
+      // Reset form fields
+      setName('');
+      setCompany('');
+      setEmail('');
+      setPhone('');
+      setMessage('');
+      setCaptchaInput('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -105,7 +177,7 @@ export default function ContactUs() {
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-12 gap-16 items-start">
 
-          {/* Left Column: Address list & SVG Map visualizer */}
+          {/* Left Column: Address list */}
           <div className="lg:col-span-5 space-y-12">
             <div>
               <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 mb-4">
@@ -116,7 +188,6 @@ export default function ContactUs() {
               </p>
             </div>
 
-
             {/* Accordion/Card list of office contacts */}
             <div className="space-y-6">
               {loadingBranches ? (
@@ -125,8 +196,8 @@ export default function ContactUs() {
                   <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Syncing branches...</p>
                 </div>
               ) : branches.length === 0 ? (
-                <div className="bg-slate-50 border border-slate-200/60 rounded-3xl p-8 text-center text-slate-450 font-semibold text-sm">
-                  <Building className="w-8 h-8 mx-auto mb-2 text-slate-350 animate-pulse animate-duration-1000" />
+                <div className="bg-slate-55 border border-slate-200/60 rounded-3xl p-8 text-center text-slate-450 font-semibold text-sm">
+                  <Building className="w-8 h-8 mx-auto mb-2 text-slate-350 animate-pulse" />
                   No active office locations configured.
                 </div>
               ) : (
@@ -149,18 +220,24 @@ export default function ContactUs() {
                           <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                           <span>{branch.address}</span>
                         </p>
-                        <p className="flex items-center gap-2.5">
-                          <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                          <span>{branch.phone}</span>
-                        </p>
-                        <p className="flex items-center gap-2.5">
-                          <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                          <span>{branch.email}</span>
-                        </p>
-                        <p className="flex items-center gap-2.5 pt-1 text-xs text-slate-400 border-t border-slate-200/50">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{branch.hours}</span>
-                        </p>
+                        {branch.phone && (
+                          <p className="flex items-center gap-2.5">
+                            <Phone className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span>{branch.phone}</span>
+                          </p>
+                        )}
+                        {branch.email && (
+                          <p className="flex items-center gap-2.5">
+                            <Mail className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span>{branch.email}</span>
+                          </p>
+                        )}
+                        {branch.hours && (
+                          <p className="flex items-center gap-2.5 pt-1 text-xs text-slate-400 border-t border-slate-200/50">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{branch.hours}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -199,7 +276,7 @@ export default function ContactUs() {
                   </div>
                   <button
                     onClick={() => setFormSubmitted(false)}
-                    className="inline-block bg-slate-900 text-white hover:bg-slate-800 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-sm"
+                    className="inline-block bg-slate-900 text-white hover:bg-slate-800 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer"
                   >
                     Submit Another Inquiry
                   </button>
@@ -212,15 +289,20 @@ export default function ContactUs() {
                       <input
                         type="text"
                         required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350"
                         placeholder="John Doe"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Company Name</label>
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                        Company Name <span className="text-slate-400 font-medium">(Optional)</span>
+                      </label>
                       <input
                         type="text"
-                        required
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
                         className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350"
                         placeholder="Industrial Ltd."
                       />
@@ -229,20 +311,27 @@ export default function ContactUs() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Work Email</label>
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                        Work Email <span className="text-slate-400 font-medium">(Optional)</span>
+                      </label>
                       <input
                         type="email"
-                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350"
                         placeholder="john@company.com"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Phone Number</label>
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                        Phone Number <span className="text-slate-400 font-medium">(Optional)</span>
+                      </label>
                       <input
                         type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+880 1XXX-XXXXXX"
                       />
                     </div>
                   </div>
@@ -250,7 +339,11 @@ export default function ContactUs() {
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Inquiry Type</label>
                     <div className="relative">
-                      <select className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 appearance-none cursor-pointer">
+                      <select
+                        value={inquiryType}
+                        onChange={(e) => setInquiryType(e.target.value)}
+                        className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 appearance-none cursor-pointer"
+                      >
                         <option>Custom Accessory Manufacturing</option>
                         <option>Dealership Application</option>
                         <option>Bulk Sourcing Inquiry</option>
@@ -268,10 +361,42 @@ export default function ContactUs() {
                     <textarea
                       rows={5}
                       required
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
                       className="w-full bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350 resize-none"
                       placeholder="Please details your product specifications, dimensional requirements, or inquiry parameters..."
                     ></textarea>
                   </div>
+
+                  {/* Robot/Spam Prevention Captcha challenge code */}
+                  {captchaEnabled && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-550 flex items-center gap-1.5">
+                        Security Verification Challenge
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="bg-slate-100 border border-slate-200/80 px-4 py-3.5 rounded-xl flex items-center justify-center font-black font-mono tracking-widest text-slate-800 select-none text-sm min-w-[120px] shadow-inner">
+                          {captchaConfigKey}
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          value={captchaInput}
+                          onChange={(e) => setCaptchaInput(e.target.value)}
+                          placeholder={`Type "${captchaConfigKey}"`}
+                          className="flex-1 bg-white border border-slate-200 px-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-semibold text-slate-800 placeholder:text-slate-350"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submission Error messages */}
+                  {error && (
+                    <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-2xl flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
@@ -281,7 +406,7 @@ export default function ContactUs() {
                     {isLoading ? (
                       <span className="flex items-center gap-2">
                         <span className="w-4.5 h-4.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Validating inquiry...
+                        Saving inquiry...
                       </span>
                     ) : (
                       <>
