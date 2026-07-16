@@ -38,9 +38,16 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   const [messages, setMessages] = React.useState<any[]>([]);
   const [loadingMessages, setLoadingMessages] = React.useState(false);
 
-  // Captcha Settings States
+  // Captcha & Page Settings States
   const [captchaEnabled, setCaptchaEnabled] = React.useState(false);
   const [captchaKey, setCaptchaKey] = React.useState('NCT-SAFE');
+  const [aboutTitle1En, setAboutTitle1En] = React.useState('A Quarter-Century of');
+  const [aboutTitle1Bn, setAboutTitle1Bn] = React.useState('একটি সিকি শতাব্দী ধরে');
+  const [aboutTitle2En, setAboutTitle2En] = React.useState('Industrial Excellence');
+  const [aboutTitle2Bn, setAboutTitle2Bn] = React.useState('শিল্পগত শ্রেষ্ঠত্ব');
+  const [aboutDescEn, setAboutDescEn] = React.useState('');
+  const [aboutDescBn, setAboutDescBn] = React.useState('');
+  
   const [savingSettings, setSavingSettings] = React.useState(false);
 
   // DB Error state
@@ -163,7 +170,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     }
   };
 
-  // Fetch captcha settings once logged in
+  // Fetch captcha and story settings once logged in
   const fetchSettings = async () => {
     if (!isSupabaseConfigured || !session) return;
     setDbError('');
@@ -176,9 +183,21 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
       if (error) throw error;
       const enabledSetting = data?.find((s) => s.key === 'captcha_enabled');
       const keySetting = data?.find((s) => s.key === 'captcha_key');
+      const at1en = data?.find((s) => s.key === 'about_title1_en');
+      const at1bn = data?.find((s) => s.key === 'about_title1_bn');
+      const at2en = data?.find((s) => s.key === 'about_title2_en');
+      const at2bn = data?.find((s) => s.key === 'about_title2_bn');
+      const aden = data?.find((s) => s.key === 'about_desc_en');
+      const adbn = data?.find((s) => s.key === 'about_desc_bn');
 
       setCaptchaEnabled(enabledSetting?.value === 'true');
       setCaptchaKey(keySetting?.value || 'NCT-SAFE');
+      setAboutTitle1En(at1en?.value || 'A Quarter-Century of');
+      setAboutTitle1Bn(at1bn?.value || 'একটি সিকি শতাব্দী ধরে');
+      setAboutTitle2En(at2en?.value || 'Industrial Excellence');
+      setAboutTitle2Bn(at2bn?.value || 'শিল্পগত শ্রেষ্ঠত্ব');
+      setAboutDescEn(aden?.value || '');
+      setAboutDescBn(adbn?.value || '');
     } catch (err: any) {
       setDbError(err.message || 'Failed to fetch settings');
     }
@@ -386,26 +405,40 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     }
   };
 
-  // Form Actions (Captcha settings update)
-  const handleSaveSettings = async (newSettings: { captchaEnabled: boolean; captchaKey: string }) => {
+  // Form Actions (Settings update)
+  const handleSaveSettings = async (newSettings: any) => {
     if (!isSupabaseConfigured || !session) return;
     setSavingSettings(true);
     setDbError('');
 
     try {
-      const { error: error1 } = await supabase!
-        .from('settings')
-        .upsert({ key: 'captcha_enabled', value: newSettings.captchaEnabled ? 'true' : 'false' });
-      if (error1) throw error1;
+      const settingsPayload = [
+        { key: 'captcha_enabled', value: newSettings.captchaEnabled ? 'true' : 'false' },
+        { key: 'captcha_key', value: newSettings.captchaKey },
+        { key: 'about_title1_en', value: newSettings.aboutTitle1En },
+        { key: 'about_title1_bn', value: newSettings.aboutTitle1Bn },
+        { key: 'about_title2_en', value: newSettings.aboutTitle2En },
+        { key: 'about_title2_bn', value: newSettings.aboutTitle2Bn },
+        { key: 'about_desc_en', value: newSettings.aboutDescEn },
+        { key: 'about_desc_bn', value: newSettings.aboutDescBn }
+      ];
 
-      const { error: error2 } = await supabase!
+      const { error } = await supabase!
         .from('settings')
-        .upsert({ key: 'captcha_key', value: newSettings.captchaKey });
-      if (error2) throw error2;
+        .upsert(settingsPayload);
+
+      if (error) throw error;
 
       setCaptchaEnabled(newSettings.captchaEnabled);
       setCaptchaKey(newSettings.captchaKey);
-      alert('Security settings updated successfully!');
+      setAboutTitle1En(newSettings.aboutTitle1En);
+      setAboutTitle1Bn(newSettings.aboutTitle1Bn);
+      setAboutTitle2En(newSettings.aboutTitle2En);
+      setAboutTitle2Bn(newSettings.aboutTitle2Bn);
+      setAboutDescEn(newSettings.aboutDescEn);
+      setAboutDescBn(newSettings.aboutDescBn);
+
+      alert('Settings updated successfully!');
     } catch (err: any) {
       setDbError(err.message || 'Failed to save settings');
     } finally {
@@ -417,7 +450,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   if (!isSupabaseConfigured) {
     return (
       <div className="min-h-screen pt-32 pb-24 bg-slate-900 text-white flex items-center justify-center">
-        <div className="max-w-md w-full px-6 py-12 bg-slate-950 border border-white/10 rounded-[32px] text-center space-y-6 shadow-2xl relative overflow-hidden">
+        <div className="max-w-md w-full px-6 py-12 bg-slate-955 border border-white/10 rounded-[32px] text-center space-y-6 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" />
           <AlertCircle className="w-16 h-16 text-primary-light mx-auto animate-pulse" />
           <h2 className="text-3xl font-black uppercase tracking-tight">CMS Connection Required</h2>
@@ -731,7 +764,16 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
           />
         ) : (
           <SettingsManager
-            initialSettings={{ captchaEnabled, captchaKey }}
+            initialSettings={{
+              captchaEnabled,
+              captchaKey,
+              aboutTitle1En,
+              aboutTitle1Bn,
+              aboutTitle2En,
+              aboutTitle2Bn,
+              aboutDescEn,
+              aboutDescBn
+            }}
             onSaveSettings={handleSaveSettings}
             savingSettings={savingSettings}
           />
