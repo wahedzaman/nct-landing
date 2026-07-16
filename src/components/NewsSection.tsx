@@ -79,7 +79,7 @@ export default function NewsSection({ onNavigate }: NewsSectionProps) {
               STAY UPDATED
             </p>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">
-              LATEST NEWS & <br />BLOGS
+              LATEST NEWS
             </h2>
           </div>
           <button
