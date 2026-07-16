@@ -43,6 +43,57 @@ create policy "Allow authenticated users full access"
   to authenticated
   using (true)
   with check (true);
+
+-- 5. Create the hero_slides table
+create table public.hero_slides (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  image text not null, -- Base64 string representing compressed image
+  title text not null,
+  description text not null,
+  type text not null
+);
+
+-- 6. Enable Row Level Security (RLS) on hero_slides
+alter table public.hero_slides enable row level security;
+
+-- 7. Policy: Public read access to hero slides
+create policy "Allow public read access for hero slides"
+  on public.hero_slides for select
+  using (true);
+
+-- 8. Policy: Authenticated editor access to hero slides
+create policy "Allow authenticated users full access for hero slides"
+  on public.hero_slides for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- 9. Create the branches table
+create table public.branches (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  name text not null,
+  address text not null,
+  phone text not null,
+  email text not null,
+  hours text not null
+);
+
+-- 10. Enable Row Level Security (RLS) on branches
+alter table public.branches enable row level security;
+
+-- 11. Policy: Public read access to branches
+create policy "Allow public read access for branches"
+  on public.branches for select
+  using (true);
+
+-- 12. Policy: Authenticated editor access to branches
+create policy "Allow authenticated users full access for branches"
+  on public.branches for all
+  to authenticated
+  using (true)
+  with check (true);
 ```
 
 Once you have set up the database and created an editor account under the **Authentication > Users** tab in Supabase, add the credentials to your local `.env` configuration:

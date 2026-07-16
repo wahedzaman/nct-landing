@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, Factory, Globe, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const SLIDES = [
   {
@@ -30,24 +31,69 @@ const SLIDES = [
 ];
 
 export default function Hero() {
+  const [slides, setSlides] = React.useState<any[]>(isSupabaseConfigured ? [] : SLIDES);
+  const [loading, setLoading] = React.useState(isSupabaseConfigured);
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [direction, setDirection] = React.useState(0); // -1 for left, 1 for right
 
-  const nextSlide = React.useCallback(() => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
+  React.useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setSlides(SLIDES);
+      setLoading(false);
+      return;
+    }
+
+    const fetchSlides = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase!
+          .from('hero_slides')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        setSlides(data || []);
+      } catch (err) {
+        console.error('Error fetching hero slides, falling back:', err);
+        setSlides(SLIDES);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSlides();
   }, []);
 
+  const nextSlide = React.useCallback(() => {
+    if (slides.length === 0) return;
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
   const prevSlide = React.useCallback(() => {
+    if (slides.length === 0) return;
     setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   // Auto-advance
   React.useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(nextSlide, 6000);
     return () => clearInterval(timer);
-  }, [nextSlide]);
+  }, [nextSlide, slides.length]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-white/10 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (slides.length === 0) {
+    return null;
+  }
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -66,7 +112,7 @@ export default function Hero() {
     })
   };
 
-  const activeSlide = SLIDES[currentIndex];
+  const activeSlide = slides[currentIndex];
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-slate-950">
@@ -153,7 +199,7 @@ export default function Hero() {
 
       {/* Slide Indicators/Bullets at the Bottom center */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
-        {SLIDES.map((_, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => {
