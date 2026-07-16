@@ -154,6 +154,33 @@ insert into public.settings (key, value) values
   ('about_desc_en', 'Founded at the turn of the century as a specialized manufacturing outfit, NCT (National Carbide Technology) has evolved from local roots into a leading industrial accessory provider. We set out to solve a singular problem: standard drills and blades were wearing out too quickly under continuous load, causing project delays and cost overruns.\n\nBy investing heavily in metallurgical research and precision engineering, we formulated specialized carbide matrices and diamond-coated elements that lasted up to four times longer than competitors. Today, our catalog spans hundreds of custom drilling, cutting, fastening, and grinding solutions trusted across construction, aerospace, and energy sectors.\n\nWhether distributing globally recognized tool catalogs or fabricating tailor-made components for multi-million-dollar infrastructure schemes, we adhere to the same unyielding standards of precision, durability, and safety.'),
   ('about_desc_bn', 'শতাব্দীর শুরুতে একটি বিশেষ উৎপাদনকারী প্রতিষ্ঠান হিসেবে প্রতিষ্ঠিত, NCT (ন্যাশনাল কার্বাইড টেকনোলজি) স্থানীয় ভিত্তি থেকে একটি শীর্ষস্থানীয় শিল্প আনুষঙ্গিক সরবরাহকারী হিসেবে বিকশিত হয়েছে। আমরা একটি একক সমস্যা সমাধানের উদ্দেশ্যে যাত্রা শুরু করেছিলাম: সাধারণ ড্রিল এবং ব্লেডগুলি ক্রমাগত লোডের অধীনে খুব দ্রুত ক্ষয় হয়ে যাচ্ছিল, যার ফলে প্রকল্পের বিলম্ব এবং অতিরিক্ত খরচ হতো।\n\nধাতব গবেষণা এবং সূক্ষ্ম প্রকৌশলে বিপুল বিনিয়োগের মাধ্যমে, আমরা বিশেষ কার্বাইড ম্যাট্রিক্স এবং ডায়মন্ড-কোটেড উপাদান তৈরি করেছি যা প্রতিযোগী ব্র্যান্ডগুলোর চেয়ে চার গুণ বেশি সময় ধরে কাজ করে। আজ, আমাদের ক্যাটালগটিতে নির্মাণ, মহাকাশ এবং শক্তি খাতে বিশ্বস্ত শত শত কাস্টম ড্রিলিং, কাটিং, ফাস্টেনিং এবং গ্রাইন্ডিং সমাধান রয়েছে।\n\nবিশ্বব্যাপী স্বীকৃত টুলের ক্যাটালগ বিতরণ করা হোক বা মাল্টি-মিলিয়ন ডলারের অবকাঠামো স্কিমগুলির জন্য তৈরি পোশাক উপাদান তৈরি করা হোক, আমরা নির্ভুলতা, স্থায়িত্ব এবং সুরক্ষার একই অনড় মান মেনে চলি।')
 on conflict (key) do nothing;
+
+-- 22. Create the products table
+create table public.products (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  title text not null,
+  category text default 'New Products' not null,
+  image text not null,
+  features jsonb not null default '[]'::jsonb,
+  is_featured boolean default false not null,
+  is_active boolean default true not null
+);
+
+-- 23. Enable Row Level Security (RLS) on products
+alter table public.products enable row level security;
+
+-- 24. Policy: Public read access to products
+create policy "Allow public read access for products"
+  on public.products for select
+  using (true);
+
+-- 25. Policy: Authenticated editor access to products
+create policy "Allow authenticated users full access for products"
+  on public.products for all
+  to authenticated
+  using (true)
+  with check (true);
 ```
 
 Once you have set up the database and created an editor account under the **Authentication > Users** tab in Supabase, add the credentials to your local `.env` configuration:

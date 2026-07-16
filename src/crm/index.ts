@@ -6,3 +6,5 @@ export { default as BranchList } from './BranchList';
 export { default as BranchForm } from './BranchForm';
 export { default as MessageList } from './MessageList';
 export { default as SettingsManager } from './SettingsManager';
+export { default as ProductList } from './ProductList';
+export { default as ProductForm } from './ProductForm';

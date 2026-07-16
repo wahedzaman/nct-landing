@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import {
   Lock, Mail, Key, LogOut, ArrowLeft, AlertCircle
 } from 'lucide-react';
-import { NewsList, NewsForm, HeroList, HeroForm, BranchList, BranchForm, MessageList, SettingsManager } from '../crm';
+import { NewsList, NewsForm, HeroList, HeroForm, BranchList, BranchForm, MessageList, SettingsManager, ProductList, ProductForm } from '../crm';
 
 interface CmsPanelProps {
   onNavigate: (page: 'home' | 'about' | 'contact' | 'news' | 'news-details' | 'cms-panel', sectionId?: string, newsId?: string) => void;
@@ -19,8 +19,8 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   const [loginError, setLoginError] = React.useState('');
   const [submittingLogin, setSubmittingLogin] = React.useState(false);
 
-  // Active Menu Tab (news, hero slides, branches, messages, settings)
-  const [activeMenu, setActiveMenu] = React.useState<'news' | 'hero' | 'branch' | 'messages' | 'settings'>('news');
+  // Active Menu Tab (news, hero slides, branches, messages, settings, product)
+  const [activeMenu, setActiveMenu] = React.useState<'news' | 'hero' | 'branch' | 'messages' | 'settings' | 'product'>('news');
 
   // Articles & Database States
   const [articles, setArticles] = React.useState<any[]>([]);
@@ -37,6 +37,12 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
   // Messages Inquiries States
   const [messages, setMessages] = React.useState<any[]>([]);
   const [loadingMessages, setLoadingMessages] = React.useState(false);
+
+  // Products States
+  const [products, setProducts] = React.useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = React.useState(false);
+  const [savingProduct, setSavingProduct] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<any>(null);
 
   // Captcha & Page Settings States
   const [captchaEnabled, setCaptchaEnabled] = React.useState(false);
@@ -170,6 +176,27 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
     }
   };
 
+  // Fetch products once logged in
+  const fetchProducts = async () => {
+    if (!isSupabaseConfigured || !session) return;
+    setLoadingProducts(true);
+    setDbError('');
+
+    try {
+      const { data, error } = await supabase!
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to fetch products');
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
   // Fetch captcha and story settings once logged in
   const fetchSettings = async () => {
     if (!isSupabaseConfigured || !session) return;
@@ -209,6 +236,7 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
       fetchSlides();
       fetchBranches();
       fetchMessages();
+      fetchProducts();
       fetchSettings();
     }
   }, [session]);
@@ -402,6 +430,54 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
       fetchMessages();
     } catch (err: any) {
       setDbError(err.message || 'Failed to delete message');
+    }
+  };
+
+  // Form Actions (Products)
+  const handleSaveProduct = async (productData: any) => {
+    if (!isSupabaseConfigured || !session) return;
+    setSavingProduct(true);
+    setDbError('');
+
+    try {
+      if (formMode === 'add') {
+        const { error } = await supabase!
+          .from('products')
+          .insert([productData]);
+        if (error) throw error;
+      } else if (formMode === 'edit' && editingProduct) {
+        const { error } = await supabase!
+          .from('products')
+          .update(productData)
+          .eq('id', editingProduct.id);
+        if (error) throw error;
+      }
+
+      setFormMode('list');
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to save product');
+    } finally {
+      setSavingProduct(false);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!isSupabaseConfigured || !session) return;
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    setDbError('');
+
+    try {
+      const { error } = await supabase!
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      fetchProducts();
+    } catch (err: any) {
+      setDbError(err.message || 'Failed to delete product');
     }
   };
 
@@ -642,6 +718,14 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
             Branches
           </button>
           <button
+            onClick={() => { setActiveMenu('product'); setFormMode('list'); }}
+            className={`py-4 text-xs font-black uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
+              activeMenu === 'product' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Product Catalog
+          </button>
+          <button
             onClick={() => { setActiveMenu('messages'); setFormMode('list'); }}
             className={`py-4 text-xs font-black uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
               activeMenu === 'messages' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -754,6 +838,34 @@ export default function CmsPanel({ onNavigate }: CmsPanelProps) {
                 setEditingBranch(null);
               }}
               savingBranch={savingBranch}
+            />
+          )
+        ) : activeMenu === 'product' ? (
+          formMode === 'list' ? (
+            <ProductList
+              products={products}
+              loadingProducts={loadingProducts}
+              onAddProduct={() => {
+                setEditingProduct(null);
+                setFormMode('add');
+              }}
+              onEditProduct={(product) => {
+                setEditingProduct(product);
+                setFormMode('edit');
+              }}
+              onDeleteProduct={handleDeleteProduct}
+            />
+          ) : (
+            <ProductForm
+              formMode={formMode}
+              editingId={editingProduct ? editingProduct.id : null}
+              initialData={editingProduct}
+              onSave={handleSaveProduct}
+              onCancel={() => {
+                setFormMode('list');
+                setEditingProduct(null);
+              }}
+              savingProduct={savingProduct}
             />
           )
         ) : activeMenu === 'messages' ? (
