@@ -34,8 +34,8 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest mb-8 border-l-2 border-primary pl-4">Company</h4>
-            <ul className="space-y-4 text-slate-400 font-medium">
+            {/* <h4 className="text-white font-bold uppercase tracking-widest mb-8 border-l-2 border-primary pl-4">Company</h4> */}
+            {/* <ul className="space-y-4 text-slate-400 font-medium">
               <li>
                 <a
                   href="#about"
@@ -62,16 +62,16 @@ export default function Footer({ onNavigate }: FooterProps) {
               </li>
               <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Sustainability</a></li>
-            </ul>
+            </ul> */}
           </div>
 
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest mb-8 border-l-2 border-primary pl-4">Support</h4>
+            {/* <h4 className="text-white font-bold uppercase tracking-widest mb-8 border-l-2 border-primary pl-4">Support</h4> */}
             <ul className="space-y-4 text-slate-400 font-medium">
-              <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
+              {/* <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Order Tracking</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Become a Dealer</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li> */}
             </ul>
           </div>
 
@@ -80,15 +80,15 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-6 text-slate-400 font-medium text-sm">
               <li className="flex gap-4">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                <span>122/A Industrial Estate Phase II, <br />Global City, TX 77001</span>
+                <span>Head Office/Depot: Snigdha Uposhohor, Bogura-5800, <br />Factory: Jatrabari, Jurain, Dhaka</span>
               </li>
               <li className="flex gap-4">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <span>+1 (800) 555-TOOL (8665)</span>
+                <span>+8801894540054</span>
               </li>
               <li className="flex gap-4">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span>contact@ntc-global.com</span>
+                <span>newcityhardware@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -121,9 +121,9 @@ export default function Footer({ onNavigate }: FooterProps) {
             © 2026 NCT (New Trade Center). All Rights Reserved.
           </p>
           <div className="flex flex-wrap gap-x-8 gap-y-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+            {/* <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Accessibility</a>
+            <a href="#" className="hover:text-primary transition-colors">Accessibility</a> */}
             <a
               href="/cms-panel"
               onClick={(e) => {

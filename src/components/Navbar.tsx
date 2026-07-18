@@ -243,13 +243,29 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               >
                 Contact Us
               </a>
-              <div className="text-center text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                NCT INDUSTRIAL SERIES // 2026
-              </div>
+              <a
+                href="https://www.facebook.com/newcitytradebd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors py-2 text-sm font-semibold uppercase tracking-widest"
+              >
+                <Facebook className="w-5 h-5" />
+                <span>Facebook</span>
+              </a>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {!isOpen && (
+        <a
+          href="tel:+8801894540054"
+          className="md:hidden fixed bottom-6 right-6 z-50 bg-primary hover:bg-primary-dark text-white p-4 rounded-full shadow-lg transition-colors flex items-center justify-center"
+          aria-label="Call Us"
+        >
+          <Phone className="w-6 h-6" />
+        </a>
+      )}
     </>
   );
 }
