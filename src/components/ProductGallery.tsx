@@ -117,7 +117,7 @@ export default function ProductGallery() {
   const visibleProducts = getVisibleProducts();
 
   return (
-    <section className="py-20 bg-[#004e82] text-white overflow-hidden relative">
+    <section className="py-20 bg-[#0F172B] text-white overflow-hidden relative">
       {/* Subtle Pattern Grid Accent */}
       <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
         style={{
@@ -125,9 +125,9 @@ export default function ProductGallery() {
           backgroundSize: '24px 24px',
         }}
       />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Banner Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-widest uppercase font-sans">
@@ -196,7 +196,7 @@ export default function ProductGallery() {
                         <h4 className="text-md sm:text-lg font-extrabold text-[#004e82] tracking-wide mb-2 uppercase truncate" title={titleStr}>
                           {titleStr}
                         </h4>
-                        
+
                         {/* Divider */}
                         <div className="w-full h-[1px] bg-slate-100 mb-4" />
 
@@ -226,7 +226,7 @@ export default function ProductGallery() {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            
+
             <span className="text-[14px] md:text-[16px] font-mono font-black tracking-widest text-white/95">
               {pivotIndex + 1} / {products.length}
             </span>

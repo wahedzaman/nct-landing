@@ -92,8 +92,8 @@ export default function FeaturedProducts() {
 
   return (
     <section id="products" className="py-0 bg-white relative z-10 overflow-hidden">
-      {/* Blue Ribbon Header */}
-      <div className="w-full bg-[#004e82] text-center py-7 mb-16">
+      {/* Ribbon Header */}
+      <div className="w-full bg-[#2FA353] text-center py-7 mb-16">
         <h2 className="text-3xl md:text-4xl lg:text-[2.25rem] font-extrabold text-white tracking-widest uppercase font-sans">
           FEATURED PRODUCTS
         </h2>
@@ -102,7 +102,7 @@ export default function FeaturedProducts() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {loading ? (
           <div className="py-24 text-center">
-            <div className="w-8 h-8 border-3 border-slate-200/60 border-t-[#004e82] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200/60 border-t-[#2FA353] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Syncing Featured Catalog...</p>
           </div>
         ) : products.length === 0 ? (
@@ -120,11 +120,10 @@ export default function FeaturedProducts() {
                   <button
                     key={product.id}
                     onClick={() => setActiveId(product.id)}
-                    className={`flex-1 min-w-[110px] md:min-w-[130px] lg:min-w-0 lg:w-full text-center p-3 transition-all duration-300 cursor-pointer ${
-                      isActive
-                        ? 'bg-[#004e82] text-white shadow-md'
-                        : 'bg-[#f0f2f5] hover:bg-[#e2e5e9]'
-                    }`}
+                    className={`flex-1 min-w-[110px] md:min-w-[130px] lg:min-w-0 lg:w-full text-center p-3 transition-all duration-300 cursor-pointer ${isActive
+                      ? 'bg-[#2FA353] text-white shadow-md'
+                      : 'bg-[#f0f2f5] hover:bg-[#e2e5e9]'
+                      }`}
                   >
                     {/* Thumbnail Image Container */}
                     <div className="aspect-square bg-transparent overflow-hidden mb-2 flex items-center justify-center p-1 max-h-16 md:max-h-20 mx-auto">
@@ -137,9 +136,8 @@ export default function FeaturedProducts() {
                     </div>
                     {/* Model tag under image */}
                     <span
-                      className={`text-[10px] md:text-[11px] font-extrabold tracking-wider block uppercase truncate ${
-                        isActive ? 'text-white' : 'text-[#004e82]'
-                      }`}
+                      className={`text-[10px] md:text-[11px] font-extrabold tracking-wider block uppercase truncate ${isActive ? 'text-white' : 'text-[#004e82]'
+                        }`}
                     >
                       {titleStr}
                     </span>
@@ -183,12 +181,12 @@ export default function FeaturedProducts() {
                   className="text-left"
                 >
                   {/* Clean category text */}
-                  <p className="text-[#004e82] font-semibold text-sm mb-2">
+                  <p className="text-[#2FA353] font-semibold text-sm mb-2">
                     {activeProduct.category}
                   </p>
 
                   {/* Big Bold model title */}
-                  <h3 className="text-3xl md:text-[2.5rem] font-extrabold text-[#004e82] tracking-tight leading-none mb-8 uppercase">
+                  <h3 className="text-3xl md:text-[2.5rem] font-extrabold text-[#2FA353] tracking-tight leading-none mb-8 uppercase">
                     {activeTitle}
                   </h3>
 

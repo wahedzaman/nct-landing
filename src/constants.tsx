@@ -14,8 +14,8 @@ export const CATEGORIES: Category[] = [
 export const STATS: Stat[] = [
   { label: 'Years in Business', value: '15', suffix: '+' },
   { label: 'Total Products', value: '500', suffix: '+' },
-  { label: 'Operating In', value: '10', suffix: 'Districts' },
-  { label: 'Total Employees', value: '51', suffix: '+' },
+  { label: 'Operating In', value: '52', suffix: 'Districts' },
+  { label: 'Total Employees', value: '140', suffix: '+' },
 ];
 
 export const FEATURED_PRODUCTS: Product[] = [

@@ -7,7 +7,7 @@ interface FooterProps {
 
 export default function Footer({ onNavigate }: FooterProps) {
   return (
-    <footer className="bg-slate-900 text-white pt-24 pb-12 overflow-hidden relative">
+    <footer className="bg-slate-900 text-white pt-12 pb-12 overflow-hidden relative">
       {/* Decorative Grid */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}
@@ -116,7 +116,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
         </div> */}
 
-        <div className="flex flex-col md:flex-row items-center justify-between pt-12 border-t border-white/10 gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between pt-4 border-t border-white/10 gap-6">
           <p className="text-slate-500 text-sm font-medium">
             © 2026 NCT (New Trade Center). All Rights Reserved.
           </p>
