@@ -157,7 +157,9 @@ export default function ProductGallery() {
                 if (idx >= 3) visibilityClass += " md:hidden lg:block";
 
                 const titleStr = product.title || product.name;
-                const descStr = (Array.isArray(product.features) ? product.features[0] : null) || product.description || '';
+                const featuresList = (Array.isArray(product.features) ? product.features : null) ||
+                                     (Array.isArray(product.bullets) ? product.bullets : null) ||
+                                     (product.description ? [product.description] : []);
 
                 return (
                   <motion.div
@@ -200,13 +202,17 @@ export default function ProductGallery() {
                         {/* Divider */}
                         <div className="w-full h-[1px] bg-slate-100 mb-4" />
 
-                        {/* Description bullet point */}
-                        <div className="flex items-start gap-2.5 text-slate-700 text-[13px] leading-relaxed">
-                          <span className="w-[8px] h-[8px] bg-[#004e82] mt-1.5 inline-block shrink-0" />
-                          <p className="font-sans font-medium line-clamp-3">
-                            {descStr}
-                          </p>
-                        </div>
+                        {/* Unordered description list */}
+                        <ul className="space-y-3 mb-4 text-slate-800 text-[14px] overflow-y-auto max-h-[160px] pr-1">
+                          {featuresList.map((bullet: string, idx: number) => (
+                            <li key={idx} className="flex items-start">
+                              <span className="w-[10px] h-[10px] bg-black mt-1.5 mr-3 inline-block shrink-0" />
+                              <span className="leading-relaxed font-sans font-medium text-[13.5px]">
+                                {bullet}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   </motion.div>
