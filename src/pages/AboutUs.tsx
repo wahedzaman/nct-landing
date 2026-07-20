@@ -122,10 +122,10 @@ export default function AboutUs() {
               WHO WE ARE
             </span>
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">
-              Engineering Trust <br /><span className="text-primary-light">One Precision Part</span> At A Time
+              <span className="text-primary-light">Precision </span> Lock Manufacturer
             </h1>
             <p className="text-slate-400 text-lg md:text-xl font-medium max-w-3xl mx-auto leading-relaxed">
-              NTC is a global manufacturer and authorized supplier of high-durability power tool accessories.
+              NCT is a manufacturer of high quality, premium and durable Locks and power tool accessories.
               We equip builders, technicians, and enterprises with the precision gear needed to shape the future safely.
             </p>
           </motion.div>
