@@ -88,11 +88,10 @@ export default function AboutUs() {
   ];
 
   const milestones = [
-    { year: "2001", title: "NTC Founded", desc: "Established as a specialized carbide drill manufacturer in Chicago, IL with a team of 10 engineers." },
-    { year: "2008", title: "ISO 9001 Certification", desc: "Upgraded facility standards to achieve formal international certification and expanded domestic distribution." },
-    { year: "2015", title: "Global Network Expansion", desc: "Launched distribution centers in the APAC and EMEA regions, scaling up to over 200 dealership partners." },
-    { year: "2023", title: "Carbide Coating Patent", desc: "Patented next-generation durable carbide coating, increasing standard tool longevity by 40%." },
-    { year: "2026", title: "Smart Manufacturing Era", desc: "Integrated smart AI diagnostics and automated robotics across 125,000 sq. ft. of manufacturing floors." }
+    { year: "2011", title: "NCT Founded", desc: "Established as a premium retailer of power tools and accessories" },
+    { year: "2020", title: "Started Trading", desc: "Upgraded facility standards and expanded distribution with more than 1000+ skus." },
+    { year: "2022", title: "Expansion", desc: "Major expansion with own branded locks and expanded operation beyond Bogra." },
+    { year: "2026", title: "Manufacturing Era", desc: "Started manufacturing premium door locks and exapnded operation to more districts." }
   ];
 
   // Split description paragraphs helper
